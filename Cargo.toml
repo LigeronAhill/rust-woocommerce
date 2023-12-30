@@ -1,0 +1,15 @@
+[package]
+name = "rust-woocommerce"
+description = "Framework for woocommerce"
+version = "0.1.0"
+edition = "2021"
+authors = ["Ligeron.Ahill"]
+rust-version = "1.75"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = {version = "0.11.23", features = ["json", "gzip"]}
+serde = { version = "1.0.193", features = ["derive"] }
+serde_with = "3.4.0"
+tokio = {version = "1.35.1", features = ["macros"]}
