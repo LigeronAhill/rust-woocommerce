@@ -12,4 +12,4 @@ rust-version = "1.75"
 reqwest = {version = "0.11.23", features = ["json", "gzip"]}
 serde = { version = "1.0.193", features = ["derive"] }
 serde_with = "3.4.0"
-tokio = {version = "1.35.1", features = ["macros"]}
+tokio = {version = "1.35.1", features = ["macros", "rt-multi-thread"]}

@@ -1,9 +1,4 @@
-struct Auth {
-    ck: String,
-    cs: String,
-}
-struct ModelController {
-    auth: Auth,
-    base_url: String,
-    client: reqwest::Client,
-}
+pub mod controllers;
+mod error;
+pub mod models;
+pub use self::error::{Error, Result};
