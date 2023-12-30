@@ -44,3 +44,8 @@ command = "git"
 args = ["commit", "-m", "${@}"]
 dependencies = ["gitadd"]
 
+[tasks.gitpush]
+command ="git"
+args = ["push"]
+dependencies = ["gitcommit"]
+
