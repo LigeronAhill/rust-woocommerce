@@ -1,4 +1,7 @@
 use crate::Result;
+
+pub mod coupons;
+pub mod entities;
 pub struct ApiClient {
     auth: Auth,
     base_url: String,

@@ -1,3 +1,5 @@
+use serde_with::skip_serializing_none;
+
 pub mod coupons;
 pub mod customers;
 pub mod data;
@@ -25,3 +27,62 @@ pub mod system_status_tools;
 pub mod tax_classes;
 pub mod tax_rates;
 pub mod webhooks;
+#[skip_serializing_none]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct MetaData {
+    pub id: Option<i64>,
+    pub key: String,
+    pub value: serde_json::Value,
+}
+#[skip_serializing_none]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct BatchObject<O: serde::Serialize> {
+    pub create: Option<Vec<O>>,
+    pub update: Option<Vec<O>>,
+}
+impl<O> BatchObject<O>
+where
+    O: serde::Serialize,
+{
+    pub fn builder() -> BatchObjectBuilder<O>
+    where
+        O: serde::Serialize + Clone,
+    {
+        BatchObjectBuilder::default()
+    }
+}
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct BatchObjectBuilder<O: serde::Serialize> {
+    pub create: Option<Vec<O>>,
+    pub update: Option<Vec<O>>,
+}
+impl<O> Default for BatchObjectBuilder<O>
+where
+    O: serde::Serialize + Clone,
+{
+    fn default() -> Self {
+        Self {
+            create: None,
+            update: None,
+        }
+    }
+}
+impl<O> BatchObjectBuilder<O>
+where
+    O: serde::Serialize + Clone,
+{
+    pub fn add_create(&mut self, object: O) -> &mut Self {
+        self.create.get_or_insert(vec![]).push(object);
+        self
+    }
+    pub fn add_update(&mut self, object: O) -> &mut Self {
+        self.update.get_or_insert(vec![]).push(object);
+        self
+    }
+    pub fn build(&self) -> BatchObject<O> {
+        BatchObject {
+            create: self.create.clone(),
+            update: self.update.clone(),
+        }
+    }
+}
