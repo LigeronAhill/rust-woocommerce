@@ -1,6 +1,6 @@
 use crate::Result;
-
 pub mod coupons;
+pub mod customers;
 pub mod entities;
 pub struct ApiClient {
     auth: Auth,
