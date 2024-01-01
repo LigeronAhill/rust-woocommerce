@@ -1,38 +1,59 @@
-use rust_woocommerce::controllers::ApiClient;
-use rust_woocommerce::Result;
+use rust_woocommerce::{models::BatchObject, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let client = ApiClient::from_env()?;
-    let coupon_b = rust_woocommerce::controllers::coupons::CreateCoupon::builder()
-        .code("test-96")
-        .discount_type(rust_woocommerce::models::coupons::DiscountType::FixedCart)
-        .amount("10000")
-        .description("test description")
-        .date_expires("2024-01-03")
-        .date_expires_gmt("2024-01-03")
-        .individual_use()
-        .product_id(3748)
-        .excluded_product_id(3744)
-        .usage_limit(10)
-        .usage_limit_per_user(1)
-        .limit_usage_to_x_items(5)
-        .free_shipping()
-        .product_category(342)
-        .excluded_product_category(149)
-        .exclude_sale_items()
-        .minimum_amount("10000")
-        .maximum_amount("100000")
-        .email_restriction("test@gmail.com")
-        .meta_data("test-key", "test-value");
-    let coupon_b = coupon_b.product_id(6);
-    let coupon_to_create = coupon_b.build();
-    let created_coupon_b = client
-        .create::<serde_json::Value>(
-            rust_woocommerce::controllers::entities::Entity::Coupon,
-            coupon_to_create,
-        )
-        .await?;
-    println!("{created_coupon_b:#?}");
+    let mut c = Vec::new();
+    let mut u = Vec::new();
+    for i in 1..10 {
+        c.push(i);
+    }
+    for i in 1..60 {
+        u.push(i);
+    }
+    let batch = rust_woocommerce::models::BatchObject {
+        create: Some(c),
+        update: Some(u),
+    };
+    let r = create_batches(&batch);
+    println!("{r:#?}");
     Ok(())
+}
+fn create_batches<T>(input_batch: &BatchObject<T>) -> Vec<BatchObject<T>>
+where
+    T: serde::Serialize + Clone,
+{
+    let mut result_batches = Vec::new();
+    let create_pages = {
+        if let Some(create) = input_batch.create.to_owned() {
+            create
+                .chunks(50)
+                .map(|slice| slice.to_vec())
+                .collect::<Vec<Vec<T>>>()
+        } else {
+            vec![]
+        }
+    };
+    let update_pages = {
+        if let Some(update) = input_batch.update.to_owned() {
+            update
+                .chunks(50)
+                .map(|slice| slice.to_vec())
+                .collect::<Vec<Vec<T>>>()
+        } else {
+            vec![]
+        }
+    };
+    let max_length = std::cmp::max(create_pages.len(), update_pages.len());
+    for i in 0..max_length {
+        let mut b = BatchObject::builder();
+        if let Some(create) = create_pages.get(i) {
+            b.extend_create(create.clone());
+        }
+        if let Some(update) = update_pages.get(i) {
+            b.extend_update(update.clone());
+        }
+        let batch = b.build();
+        result_batches.push(batch);
+    }
+    result_batches
 }

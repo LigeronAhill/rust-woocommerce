@@ -79,6 +79,14 @@ where
         self.update.get_or_insert(vec![]).push(object);
         self
     }
+    pub fn extend_create(&mut self, vec: Vec<O>) -> &mut Self {
+        self.create.get_or_insert(vec![]).extend(vec);
+        self
+    }
+    pub fn extend_update(&mut self, vec: Vec<O>) -> &mut Self {
+        self.update.get_or_insert(vec![]).extend(vec);
+        self
+    }
     pub fn build(&self) -> BatchObject<O> {
         BatchObject {
             create: self.create.clone(),

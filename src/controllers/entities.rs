@@ -64,20 +64,33 @@ impl ApiClient {
             .await?;
         Ok(response)
     }
-    pub async fn list_all<T>(&self, entity: Entity) -> Result<T>
+    pub async fn list_all<T>(&self, entity: Entity) -> Result<Vec<T>>
     where
         T: DeserializeOwned,
     {
-        let uri = format!("{}{entity}", self.base_url());
-        let response: T = self
-            .client
-            .get(&uri)
-            .basic_auth(self.ck(), Some(self.cs()))
-            .send()
-            .await?
-            .json()
-            .await?;
-        Ok(response)
+        let mut result = vec![];
+        let mut page = 1;
+        let per_page = 50;
+        loop {
+            let uri = format!(
+                "{}{entity}?page={page}&per_page={per_page}",
+                self.base_url()
+            );
+            let response: Vec<T> = self
+                .client
+                .get(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .send()
+                .await?
+                .json()
+                .await?;
+            if response.is_empty() {
+                break;
+            }
+            result.extend(response);
+            page += 1;
+        }
+        Ok(result)
     }
     pub async fn create<T>(&self, entity: Entity, object: impl Serialize) -> Result<T>
     where
@@ -135,39 +148,98 @@ impl ApiClient {
         &self,
         entity: Entity,
         batch_object: BatchObject<T>,
-    ) -> Result<BatchObject<T>>
+    ) -> Result<Vec<BatchObject<T>>>
     where
-        T: DeserializeOwned + Serialize,
+        T: DeserializeOwned + Serialize + Clone,
     {
         let uri = format!("{}{entity}/batch", self.base_url());
-        let response: BatchObject<T> = self
-            .client
-            .post(&uri)
-            .basic_auth(self.ck(), Some(self.cs()))
-            .json(&batch_object)
-            .send()
-            .await?
-            .json()
-            .await?;
-        Ok(response)
+        // By default it's limited to up to 100 objects to be created, updated or deleted.
+        let batches = create_batches(&batch_object);
+        let mut modified = Vec::new();
+        for batch in batches {
+            let response: BatchObject<T> = self
+                .client
+                .post(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .json(&batch)
+                .send()
+                .await?
+                .json()
+                .await?;
+            modified.push(response);
+        }
+        Ok(modified)
     }
-    pub async fn search<T>(&self, entity: Entity, search_string: impl Into<String>) -> Result<T>
+    pub async fn search<T>(
+        &self,
+        entity: Entity,
+        search_string: impl Into<String>,
+    ) -> Result<Vec<T>>
     where
         T: DeserializeOwned,
     {
-        let uri = format!(
-            "{}{entity}?search={}",
-            self.base_url(),
-            search_string.into()
-        );
-        let response: T = self
-            .client
-            .get(&uri)
-            .basic_auth(self.ck(), Some(self.cs()))
-            .send()
-            .await?
-            .json()
-            .await?;
-        Ok(response)
+        let mut result = vec![];
+        let mut page = 1;
+        let per_page = 50;
+        let search = search_string.into();
+        loop {
+            let uri = format!(
+                "{}{entity}?page={page}&per_page={per_page}&search={search}",
+                self.base_url(),
+            );
+            let response: Vec<T> = self
+                .client
+                .get(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .send()
+                .await?
+                .json()
+                .await?;
+            if response.is_empty() {
+                break;
+            }
+            result.extend(response);
+            page += 1;
+        }
+        Ok(result)
     }
+}
+fn create_batches<T>(input_batch: &BatchObject<T>) -> Vec<BatchObject<T>>
+where
+    T: serde::Serialize + Clone,
+{
+    let mut result_batches = Vec::new();
+    let create_pages = {
+        if let Some(create) = input_batch.create.to_owned() {
+            create
+                .chunks(50)
+                .map(|slice| slice.to_vec())
+                .collect::<Vec<Vec<T>>>()
+        } else {
+            vec![]
+        }
+    };
+    let update_pages = {
+        if let Some(update) = input_batch.update.to_owned() {
+            update
+                .chunks(50)
+                .map(|slice| slice.to_vec())
+                .collect::<Vec<Vec<T>>>()
+        } else {
+            vec![]
+        }
+    };
+    let max_length = std::cmp::max(create_pages.len(), update_pages.len());
+    for i in 0..max_length {
+        let mut b = BatchObject::builder();
+        if let Some(create) = create_pages.get(i) {
+            b.extend_create(create.clone());
+        }
+        if let Some(update) = update_pages.get(i) {
+            b.extend_update(update.clone());
+        }
+        let batch = b.build();
+        result_batches.push(batch);
+    }
+    result_batches
 }

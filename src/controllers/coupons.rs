@@ -489,7 +489,7 @@ mod tests {
     #[tokio::test]
     async fn test_create_coupon() {
         let client = ApiClient::from_env().unwrap();
-        let coupon = CreateCoupon::builder()
+        let coupon = Coupon::create()
             .code("complicated-coupon-for-create")
             .discount_type(DiscountType::FixedCart)
             .amount("10")
@@ -537,14 +537,14 @@ mod tests {
             .await
             .unwrap();
         let id = search_result.first().unwrap().id;
-        let update = UpdateCoupon::builder().usage_limit_per_user(3).build();
+        let update = Coupon::update().usage_limit_per_user(3).build();
         let updated: Coupon = client.update(Entity::Coupon, id, update).await.unwrap();
         assert_eq!(updated.usage_limit_per_user, Some(3))
     }
     #[tokio::test]
     async fn test_delete_coupon() {
         let client = ApiClient::from_env().unwrap();
-        let coupon = CreateCoupon::builder()
+        let coupon = Coupon::create()
             .code("complicated-coupon-for-delete")
             .discount_type(DiscountType::FixedCart)
             .amount("10")
@@ -597,9 +597,9 @@ mod tests {
             .await
             .unwrap();
         let id = search_result.first().unwrap().id;
-        let update = UpdateCoupon::builder().amount("3").id(id).build();
+        let update = Coupon::update().amount("3").id(id).build();
         let batch = BatchObject::builder().add_update(update).build();
         let batched = client.batch_update(Entity::Coupon, batch).await.unwrap();
-        assert!(!batched.update.unwrap().is_empty());
+        assert!(!batched.is_empty());
     }
 }
