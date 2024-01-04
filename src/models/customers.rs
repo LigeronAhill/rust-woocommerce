@@ -11,7 +11,7 @@ pub struct Customer {
     pub id: i32,
     /// The date the customer was created, in the site's timezone.
     pub date_created: NaiveDateTime,
-    /// The date the customer was created, as GMTdate_created_gmt	date-time	The date the customer was created, as GMT.READ-ONLY
+    /// The date the customer was created, as GMT
     pub date_modified: NaiveDateTime,
     /// The date the customer was last modified, as GMT.
     pub date_modified_gmt: NaiveDateTime,

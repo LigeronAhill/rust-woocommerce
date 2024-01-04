@@ -4,6 +4,7 @@ description = "Framework for woocommerce"
 version = "0.1.0"
 edition = "2021"
 authors = ["Ligeron.Ahill"]
+license = "MIT"
 rust-version = "1.75"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

@@ -1,7 +1,11 @@
 use serde::{de::DeserializeOwned, Serialize};
 
 use super::ApiClient;
-use crate::{models::BatchObject, Result};
+use crate::{
+    models::{data::Currency, BatchObject},
+    Result,
+};
+#[derive(Debug, Clone, PartialEq)]
 pub enum Entity {
     Coupon,
     Customer,
@@ -22,6 +26,10 @@ pub enum Entity {
     SystemStatus,
     SystemStatusTool,
     Data,
+    Currency,
+    Country,
+    Continent,
+    CurrentCurrency,
 }
 impl std::fmt::Display for Entity {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -45,6 +53,10 @@ impl std::fmt::Display for Entity {
             Entity::SystemStatus => write!(f, "system_status"),
             Entity::SystemStatusTool => write!(f, "system_status/tools"),
             Entity::Data => write!(f, "data"),
+            Entity::Currency => write!(f, "data/currencies"),
+            Entity::Country => write!(f, "data/countries"),
+            Entity::Continent => write!(f, "data/continents"),
+            Entity::CurrentCurrency => write!(f, "data/currencies/current"),
         }
     }
 }
@@ -54,7 +66,7 @@ impl ApiClient {
         T: DeserializeOwned,
     {
         let uri = format!("{}{entity}/{entity_id}", self.base_url());
-        let response: T = self
+        let response: serde_json::Value = self
             .client
             .get(&uri)
             .basic_auth(self.ck(), Some(self.cs()))
@@ -62,7 +74,31 @@ impl ApiClient {
             .await?
             .json()
             .await?;
-        Ok(response)
+        match serde_json::from_value::<T>(response.clone()) {
+            Ok(result) => Ok(result),
+            Err(_) => {
+                let msg = format!("{response:#?}");
+                Err(msg.into())
+            }
+        }
+    }
+    pub async fn retrieve_current_currency(&self) -> Result<Currency> {
+        let uri = format!("{}data/currencies/current", self.base_url());
+        let response: serde_json::Value = self
+            .client
+            .get(&uri)
+            .basic_auth(self.ck(), Some(self.cs()))
+            .send()
+            .await?
+            .json()
+            .await?;
+        match serde_json::from_value::<Currency>(response.clone()) {
+            Ok(result) => Ok(result),
+            Err(e) => {
+                let msg = format!("{response:#?}\n Error: {e:#?}");
+                Err(msg.into())
+            }
+        }
     }
     pub async fn list_all<T>(&self, entity: Entity) -> Result<Vec<T>>
     where
@@ -71,12 +107,13 @@ impl ApiClient {
         let mut result = vec![];
         let mut page = 1;
         let per_page = 50;
-        loop {
-            let uri = format!(
-                "{}{entity}?page={page}&per_page={per_page}",
-                self.base_url()
-            );
-            let response: Vec<T> = self
+        if entity == Entity::Data
+            || entity == Entity::Currency
+            || entity == Entity::Country
+            || entity == Entity::Continent
+        {
+            let uri = format!("{}{entity}", self.base_url());
+            let response: serde_json::Value = self
                 .client
                 .get(&uri)
                 .basic_auth(self.ck(), Some(self.cs()))
@@ -84,11 +121,43 @@ impl ApiClient {
                 .await?
                 .json()
                 .await?;
-            if response.is_empty() {
-                break;
+            match serde_json::from_value::<Vec<T>>(response.clone()) {
+                Ok(result) => {
+                    return Ok(result);
+                }
+                Err(_) => {
+                    let msg = format!("{response:#?}");
+                    return Err(msg.into());
+                }
             }
-            result.extend(response);
-            page += 1;
+        } else {
+            loop {
+                let uri = format!(
+                    "{}{entity}?page={page}&per_page={per_page}",
+                    self.base_url()
+                );
+                let response: serde_json::Value = self
+                    .client
+                    .get(&uri)
+                    .basic_auth(self.ck(), Some(self.cs()))
+                    .send()
+                    .await?
+                    .json()
+                    .await?;
+                match serde_json::from_value::<Vec<T>>(response.clone()) {
+                    Ok(chunk_result) => {
+                        if chunk_result.is_empty() {
+                            break;
+                        }
+                        result.extend(chunk_result);
+                        page += 1;
+                    }
+                    Err(e) => {
+                        let msg = format!("{response:#?}\nError: {e:#?}");
+                        return Err(msg.into());
+                    }
+                }
+            }
         }
         Ok(result)
     }
@@ -97,7 +166,7 @@ impl ApiClient {
         T: DeserializeOwned,
     {
         let uri = format!("{}{entity}", self.base_url());
-        let response: T = self
+        let response: serde_json::Value = self
             .client
             .post(&uri)
             .basic_auth(self.ck(), Some(self.cs()))
@@ -106,7 +175,13 @@ impl ApiClient {
             .await?
             .json()
             .await?;
-        Ok(response)
+        match serde_json::from_value::<T>(response.clone()) {
+            Ok(result) => Ok(result),
+            Err(_) => {
+                let msg = format!("{response:#?}");
+                Err(msg.into())
+            }
+        }
     }
     pub async fn update<T>(
         &self,
@@ -118,7 +193,7 @@ impl ApiClient {
         T: DeserializeOwned,
     {
         let uri = format!("{}{entity}/{entity_id}", self.base_url());
-        let response: T = self
+        let response: serde_json::Value = self
             .client
             .put(&uri)
             .basic_auth(self.ck(), Some(self.cs()))
@@ -127,14 +202,20 @@ impl ApiClient {
             .await?
             .json()
             .await?;
-        Ok(response)
+        match serde_json::from_value::<T>(response.clone()) {
+            Ok(result) => Ok(result),
+            Err(_) => {
+                let msg = format!("{response:#?}");
+                Err(msg.into())
+            }
+        }
     }
     pub async fn delete<T>(&self, entity: Entity, entity_id: impl std::fmt::Display) -> Result<T>
     where
         T: DeserializeOwned,
     {
         let uri = format!("{}{entity}/{entity_id}?force=true", self.base_url());
-        let response: T = self
+        let response: serde_json::Value = self
             .client
             .delete(&uri)
             .basic_auth(self.ck(), Some(self.cs()))
@@ -142,7 +223,13 @@ impl ApiClient {
             .await?
             .json()
             .await?;
-        Ok(response)
+        match serde_json::from_value::<T>(response.clone()) {
+            Ok(result) => Ok(result),
+            Err(_) => {
+                let msg = format!("{response:#?}");
+                Err(msg.into())
+            }
+        }
     }
     pub async fn batch_update<T>(
         &self,
@@ -157,7 +244,7 @@ impl ApiClient {
         let batches = create_batches(&batch_object);
         let mut modified = Vec::new();
         for batch in batches {
-            let response: BatchObject<T> = self
+            let response: serde_json::Value = self
                 .client
                 .post(&uri)
                 .basic_auth(self.ck(), Some(self.cs()))
@@ -166,7 +253,15 @@ impl ApiClient {
                 .await?
                 .json()
                 .await?;
-            modified.push(response);
+            match serde_json::from_value::<BatchObject<T>>(response.clone()) {
+                Ok(result) => {
+                    modified.push(result);
+                }
+                Err(_) => {
+                    let msg = format!("{response:#?}");
+                    return Err(msg.into());
+                }
+            }
         }
         Ok(modified)
     }
@@ -187,7 +282,7 @@ impl ApiClient {
                 "{}{entity}?page={page}&per_page={per_page}&search={search}",
                 self.base_url(),
             );
-            let response: Vec<T> = self
+            let response: serde_json::Value = self
                 .client
                 .get(&uri)
                 .basic_auth(self.ck(), Some(self.cs()))
@@ -195,11 +290,19 @@ impl ApiClient {
                 .await?
                 .json()
                 .await?;
-            if response.is_empty() {
-                break;
+            match serde_json::from_value::<Vec<T>>(response.clone()) {
+                Ok(chunk_result) => {
+                    if chunk_result.is_empty() {
+                        break;
+                    }
+                    result.extend(chunk_result);
+                    page += 1;
+                }
+                Err(_) => {
+                    let msg = format!("{response:#?}");
+                    return Err(msg.into());
+                }
             }
-            result.extend(response);
-            page += 1;
         }
         Ok(result)
     }
