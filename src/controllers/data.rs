@@ -33,6 +33,6 @@ mod tests {
     async fn test_retrieve_current_currency() {
         let client = ApiClient::from_env().unwrap();
         let current_currency: Currency = client.retrieve_current_currency().await.unwrap();
-        assert_eq!(current_currency.code, "RUB");
+        assert_eq!(current_currency.code, crate::models::data::CurrencyISO::RUB);
     }
 }

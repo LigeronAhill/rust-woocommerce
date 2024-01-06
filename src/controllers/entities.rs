@@ -125,8 +125,8 @@ impl ApiClient {
                 Ok(result) => {
                     return Ok(result);
                 }
-                Err(_) => {
-                    let msg = format!("{response:#?}");
+                Err(e) => {
+                    let msg = format!("{response:#?}\n\n{e}");
                     return Err(msg.into());
                 }
             }
