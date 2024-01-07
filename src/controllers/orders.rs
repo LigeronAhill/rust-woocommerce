@@ -1,12 +1,12 @@
-use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
-
 use crate::models::{
     customers::{Billing, Shipping},
     data::CurrencyISO,
     orders::{OrderStatus, TaxStatus},
     MetaData,
 };
+use crate::Result;
+use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateOrder {
@@ -404,14 +404,20 @@ impl CreateOrderBuilder {
         let _ = self.set_paid.insert(paid);
         self
     }
-    pub fn build(&self) -> CreateOrder {
-        CreateOrder {
+    pub fn build(&self) -> Result<CreateOrder> {
+        let Some(billing) = self.billing.clone() else {
+            return Err("billing email required!".into());
+        };
+        if billing.email.is_empty() {
+            return Err("billing email required!".into());
+        }
+        Ok(CreateOrder {
             parent_id: self.parent_id,
             status: self.status.clone().unwrap_or_default(),
             currency: self.currency.clone().unwrap_or_default(),
             customer_id: self.customer_id.unwrap_or(0),
             customer_note: self.customer_note.clone(),
-            billing: self.billing.clone().unwrap_or_default(),
+            billing,
             shipping: self.shipping.clone().unwrap_or_default(),
             payment_method: self.payment_method.clone().unwrap_or_default(),
             payment_method_title: self.payment_method_title.clone().unwrap_or_default(),
@@ -422,7 +428,7 @@ impl CreateOrderBuilder {
             fee_lines: self.fee_lines.clone().unwrap_or_default(),
             coupon_lines: self.coupon_lines.clone().unwrap_or_default(),
             set_paid: self.set_paid.unwrap_or_default(),
-        }
+        })
     }
 }
 #[derive(Clone, Default)]
@@ -727,9 +733,11 @@ mod tests {
         let order_to_create = Order::create()
             .status(OrderStatus::Pending)
             .billing_email("president@google.com")
+            .billing_last_name("Connor")
             .currency(CurrencyISO::RUB)
             .set_paid(false)
-            .build();
+            .build()
+            .unwrap();
         let created_order: Order = client.create(Entity::Order, order_to_create).await.unwrap();
         assert_eq!(created_order.status, OrderStatus::Pending);
         let _deleted: Order = client
@@ -738,5 +746,16 @@ mod tests {
             .unwrap();
     }
     #[tokio::test]
-    async fn update_order() {}
+    async fn update_order() {
+        let client = ApiClient::from_env().unwrap();
+        let orders: Vec<Order> = client.list_all(Entity::Order).await.unwrap();
+        let order_to_update = orders.last().unwrap().id;
+        let customer_note = "Testing update";
+        let update = Order::update().customer_note(customer_note).build();
+        let updated_order: Order = client
+            .update(Entity::Order, order_to_update, update)
+            .await
+            .unwrap();
+        assert_eq!(updated_order.customer_note, customer_note);
+    }
 }

@@ -24,7 +24,7 @@ dependencies = ["clean"]
 
 [tasks.test]
 command = "cargo"
-args = ["test", "--", "--test-threads=1"]
+args = ["test"]
 dependencies = ["build"]
 
 [tasks.tarpaulin]
