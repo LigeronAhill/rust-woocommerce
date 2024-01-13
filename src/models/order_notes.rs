@@ -1,5 +1,9 @@
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+
+use crate::controllers::order_notes::{
+    NoId, NoNote, OrderNotesCreateBuilder, OrderNotesUpdateBuilder,
+};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrderNotes {
     /// Unique identifier for the resource.
@@ -15,5 +19,13 @@ pub struct OrderNotes {
     /// If true, the note will be shown to customers and they will be notified. If false, the note will be for admin reference only. Default is false.    
     pub customer_note: bool,
     /// If true, this note will be attributed to the current user. If false, the note will be attributed to the system. Default is false.    
-    pub added_by_user: bool,
+    pub added_by_user: Option<bool>,
+}
+impl OrderNotes {
+    pub fn create() -> OrderNotesCreateBuilder<NoNote> {
+        OrderNotesCreateBuilder::<NoNote>::new()
+    }
+    pub fn update() -> OrderNotesUpdateBuilder<NoId> {
+        OrderNotesUpdateBuilder::<NoId>::new()
+    }
 }

@@ -3,6 +3,7 @@ pub mod coupons;
 pub mod customers;
 pub mod data;
 pub mod entities;
+pub mod order_notes;
 pub mod orders;
 pub struct ApiClient {
     auth: Auth,

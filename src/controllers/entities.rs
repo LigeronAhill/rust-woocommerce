@@ -66,36 +66,84 @@ impl ApiClient {
         T: DeserializeOwned,
     {
         let uri = format!("{}{entity}/{entity_id}", self.base_url());
-        let response: serde_json::Value = self
-            .client
-            .get(&uri)
-            .basic_auth(self.ck(), Some(self.cs()))
-            .send()
-            .await?
-            .json()
-            .await?;
+        let mut response = serde_json::Value::Null;
+        for i in 1..6 {
+            log::debug!("Connecting {uri}, try {i}");
+            match self
+                .client
+                .get(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .send()
+                .await
+            {
+                Ok(r) => {
+                    log::debug!("Deserializing response from {uri}");
+                    match r.json().await {
+                        Ok(v) => {
+                            response = v;
+                            break;
+                        }
+                        Err(e) => {
+                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            continue;
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!(
+                        "Failed to connect to {uri} with error: {e}\n{} tries left",
+                        5 - i
+                    );
+                    continue;
+                }
+            }
+        }
         match serde_json::from_value::<T>(response.clone()) {
             Ok(result) => Ok(result),
-            Err(_) => {
-                let msg = format!("{response:#?}");
+            Err(e) => {
+                let msg = format!("Error with response to {uri} --> {e}\n{response:#?}");
                 Err(msg.into())
             }
         }
     }
     pub async fn retrieve_current_currency(&self) -> Result<Currency> {
         let uri = format!("{}data/currencies/current", self.base_url());
-        let response: serde_json::Value = self
-            .client
-            .get(&uri)
-            .basic_auth(self.ck(), Some(self.cs()))
-            .send()
-            .await?
-            .json()
-            .await?;
+        let mut response = serde_json::Value::Null;
+        for i in 1..6 {
+            log::debug!("Connecting {uri}, try {i}");
+            match self
+                .client
+                .get(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .send()
+                .await
+            {
+                Ok(r) => {
+                    log::debug!("Deserializing response from {uri}");
+                    match r.json().await {
+                        Ok(v) => {
+                            response = v;
+                            break;
+                        }
+                        Err(e) => {
+                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            continue;
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!(
+                        "Failed to connect to {uri} with error: {e}\n{} tries left",
+                        5 - i
+                    );
+                    continue;
+                }
+            }
+        }
         match serde_json::from_value::<Currency>(response.clone()) {
             Ok(result) => Ok(result),
             Err(e) => {
-                let msg = format!("{response:#?}\n Error: {e:#?}");
+                let msg = format!("Error getting current currency\n{response:#?}\n Error: {e:#?}");
                 Err(msg.into())
             }
         }
@@ -113,20 +161,44 @@ impl ApiClient {
             || entity == Entity::Continent
         {
             let uri = format!("{}{entity}", self.base_url());
-            let response: serde_json::Value = self
-                .client
-                .get(&uri)
-                .basic_auth(self.ck(), Some(self.cs()))
-                .send()
-                .await?
-                .json()
-                .await?;
+            let mut response = serde_json::Value::Null;
+            for i in 1..6 {
+                log::debug!("Connecting {uri}, try {i}");
+                match self
+                    .client
+                    .get(&uri)
+                    .basic_auth(self.ck(), Some(self.cs()))
+                    .send()
+                    .await
+                {
+                    Ok(r) => {
+                        log::debug!("Deserializing response from {uri}");
+                        match r.json().await {
+                            Ok(v) => {
+                                response = v;
+                                break;
+                            }
+                            Err(e) => {
+                                log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                                continue;
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        log::error!(
+                            "Failed to connect to {uri} with error: {e}\n{} tries left",
+                            5 - i
+                        );
+                        continue;
+                    }
+                }
+            }
             match serde_json::from_value::<Vec<T>>(response.clone()) {
                 Ok(result) => {
                     return Ok(result);
                 }
                 Err(e) => {
-                    let msg = format!("{response:#?}\n\n{e}");
+                    let msg = format!("Error getting {uri}\n\n{response:#?}\n\n{e}");
                     return Err(msg.into());
                 }
             }
@@ -136,14 +208,38 @@ impl ApiClient {
                     "{}{entity}?page={page}&per_page={per_page}",
                     self.base_url()
                 );
-                let response: serde_json::Value = self
-                    .client
-                    .get(&uri)
-                    .basic_auth(self.ck(), Some(self.cs()))
-                    .send()
-                    .await?
-                    .json()
-                    .await?;
+                let mut response = serde_json::Value::Null;
+                for i in 1..6 {
+                    log::debug!("Connecting {uri}, try {i}");
+                    match self
+                        .client
+                        .get(&uri)
+                        .basic_auth(self.ck(), Some(self.cs()))
+                        .send()
+                        .await
+                    {
+                        Ok(r) => {
+                            log::debug!("Deserializing response from {uri}");
+                            match r.json().await {
+                                Ok(v) => {
+                                    response = v;
+                                    break;
+                                }
+                                Err(e) => {
+                                    log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                                    continue;
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            log::error!(
+                                "Failed to connect to {uri} with error: {e}\n{} tries left",
+                                5 - i
+                            );
+                            continue;
+                        }
+                    }
+                }
                 match serde_json::from_value::<Vec<T>>(response.clone()) {
                     Ok(chunk_result) => {
                         if chunk_result.is_empty() {
@@ -153,7 +249,7 @@ impl ApiClient {
                         page += 1;
                     }
                     Err(e) => {
-                        let msg = format!("{response:#?}\nError: {e:#?}");
+                        let msg = format!("Error getting {uri}\n{response:#?}\nError: {e:#?}");
                         return Err(msg.into());
                     }
                 }
@@ -166,19 +262,43 @@ impl ApiClient {
         T: DeserializeOwned,
     {
         let uri = format!("{}{entity}", self.base_url());
-        let response: serde_json::Value = self
-            .client
-            .post(&uri)
-            .basic_auth(self.ck(), Some(self.cs()))
-            .json(&object)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let mut response = serde_json::Value::Null;
+        for i in 1..6 {
+            log::debug!("Connecting {uri}, try {i}");
+            match self
+                .client
+                .post(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .json(&object)
+                .send()
+                .await
+            {
+                Ok(r) => {
+                    log::debug!("Deserializing response from {uri}");
+                    match r.json().await {
+                        Ok(v) => {
+                            response = v;
+                            break;
+                        }
+                        Err(e) => {
+                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            continue;
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!(
+                        "Failed to connect to {uri} with error: {e}\n{} tries left",
+                        5 - i
+                    );
+                    continue;
+                }
+            }
+        }
         match serde_json::from_value::<T>(response.clone()) {
             Ok(result) => Ok(result),
-            Err(_) => {
-                let msg = format!("{response:#?}");
+            Err(e) => {
+                let msg = format!("Error getting {uri} --> {e}\n{response:#?}");
                 Err(msg.into())
             }
         }
@@ -193,15 +313,39 @@ impl ApiClient {
         T: DeserializeOwned,
     {
         let uri = format!("{}{entity}/{entity_id}", self.base_url());
-        let response: serde_json::Value = self
-            .client
-            .put(&uri)
-            .basic_auth(self.ck(), Some(self.cs()))
-            .json(&object)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let mut response = serde_json::Value::Null;
+        for i in 1..6 {
+            log::debug!("Connecting {uri}, try {i}");
+            match self
+                .client
+                .put(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .json(&object)
+                .send()
+                .await
+            {
+                Ok(r) => {
+                    log::debug!("Deserializing response from {uri}");
+                    match r.json().await {
+                        Ok(v) => {
+                            response = v;
+                            break;
+                        }
+                        Err(e) => {
+                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            continue;
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!(
+                        "Failed to connect to {uri} with error: {e}\n{} tries left",
+                        5 - i
+                    );
+                    continue;
+                }
+            }
+        }
         match serde_json::from_value::<T>(response.clone()) {
             Ok(result) => Ok(result),
             Err(_) => {
@@ -215,14 +359,38 @@ impl ApiClient {
         T: DeserializeOwned,
     {
         let uri = format!("{}{entity}/{entity_id}?force=true", self.base_url());
-        let response: serde_json::Value = self
-            .client
-            .delete(&uri)
-            .basic_auth(self.ck(), Some(self.cs()))
-            .send()
-            .await?
-            .json()
-            .await?;
+        let mut response = serde_json::Value::Null;
+        for i in 1..6 {
+            log::debug!("Connecting {uri}, try {i}");
+            match self
+                .client
+                .delete(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .send()
+                .await
+            {
+                Ok(r) => {
+                    log::debug!("Deserializing response from {uri}");
+                    match r.json().await {
+                        Ok(v) => {
+                            response = v;
+                            break;
+                        }
+                        Err(e) => {
+                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            continue;
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!(
+                        "Failed to connect to {uri} with error: {e}\n{} tries left",
+                        5 - i
+                    );
+                    continue;
+                }
+            }
+        }
         match serde_json::from_value::<T>(response.clone()) {
             Ok(result) => Ok(result),
             Err(_) => {
@@ -244,15 +412,39 @@ impl ApiClient {
         let batches = create_batches(&batch_object);
         let mut modified = Vec::new();
         for batch in batches {
-            let response: serde_json::Value = self
-                .client
-                .post(&uri)
-                .basic_auth(self.ck(), Some(self.cs()))
-                .json(&batch)
-                .send()
-                .await?
-                .json()
-                .await?;
+            let mut response = serde_json::Value::Null;
+            for i in 1..6 {
+                log::debug!("Connecting {uri}, try {i}");
+                match self
+                    .client
+                    .post(&uri)
+                    .basic_auth(self.ck(), Some(self.cs()))
+                    .json(&batch)
+                    .send()
+                    .await
+                {
+                    Ok(r) => {
+                        log::debug!("Deserializing response from {uri}");
+                        match r.json().await {
+                            Ok(v) => {
+                                response = v;
+                                break;
+                            }
+                            Err(e) => {
+                                log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                                continue;
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        log::error!(
+                            "Failed to connect to {uri} with error: {e}\n{} tries left",
+                            5 - i
+                        );
+                        continue;
+                    }
+                }
+            }
             match serde_json::from_value::<BatchObject<T>>(response.clone()) {
                 Ok(result) => {
                     modified.push(result);
@@ -282,14 +474,38 @@ impl ApiClient {
                 "{}{entity}?page={page}&per_page={per_page}&search={search}",
                 self.base_url(),
             );
-            let response: serde_json::Value = self
-                .client
-                .get(&uri)
-                .basic_auth(self.ck(), Some(self.cs()))
-                .send()
-                .await?
-                .json()
-                .await?;
+            let mut response = serde_json::Value::Null;
+            for i in 1..6 {
+                log::debug!("Connecting {uri}, try {i}");
+                match self
+                    .client
+                    .get(&uri)
+                    .basic_auth(self.ck(), Some(self.cs()))
+                    .send()
+                    .await
+                {
+                    Ok(r) => {
+                        log::debug!("Deserializing response from {uri}");
+                        match r.json().await {
+                            Ok(v) => {
+                                response = v;
+                                break;
+                            }
+                            Err(e) => {
+                                log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                                continue;
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        log::error!(
+                            "Failed to connect to {uri} with error: {e}\n{} tries left",
+                            5 - i
+                        );
+                        continue;
+                    }
+                }
+            }
             match serde_json::from_value::<Vec<T>>(response.clone()) {
                 Ok(chunk_result) => {
                     if chunk_result.is_empty() {
@@ -298,8 +514,8 @@ impl ApiClient {
                     result.extend(chunk_result);
                     page += 1;
                 }
-                Err(_) => {
-                    let msg = format!("{response:#?}");
+                Err(e) => {
+                    let msg = format!("Error getting {uri} - {e}\n{response:#?}");
                     return Err(msg.into());
                 }
             }
@@ -345,4 +561,288 @@ where
         result_batches.push(batch);
     }
     result_batches
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum SubEntity {
+    OrderNote,
+}
+impl std::fmt::Display for SubEntity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SubEntity::OrderNote => write!(f, "notes"),
+        }
+    }
+}
+impl ApiClient {
+    pub async fn retrieve_subentity<T>(
+        &self,
+        entity: Entity,
+        entity_id: impl std::fmt::Display,
+        subentity: SubEntity,
+        subentity_id: impl std::fmt::Display,
+    ) -> Result<T>
+    where
+        T: DeserializeOwned,
+    {
+        let uri = format!(
+            "{}{entity}/{entity_id}/{subentity}/{subentity_id}",
+            self.base_url()
+        );
+        let mut response = serde_json::Value::Null;
+        for i in 1..6 {
+            log::debug!("Connecting {uri}, try {i}");
+            match self
+                .client
+                .get(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .send()
+                .await
+            {
+                Ok(r) => {
+                    log::debug!("Deserializing response from {uri}");
+                    match r.json().await {
+                        Ok(v) => {
+                            response = v;
+                            break;
+                        }
+                        Err(e) => {
+                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            continue;
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!(
+                        "Failed to connect to {uri} with error: {e}\n{} tries left",
+                        5 - i
+                    );
+                    continue;
+                }
+            }
+        }
+        match serde_json::from_value::<T>(response.clone()) {
+            Ok(result) => Ok(result),
+            Err(e) => {
+                let msg = format!("Error with response to {uri} --> {e}\n{response:#?}");
+                Err(msg.into())
+            }
+        }
+    }
+    pub async fn list_all_subentities<T>(
+        &self,
+        entity: Entity,
+        entity_id: impl std::fmt::Display,
+        subentity: SubEntity,
+    ) -> Result<Vec<T>>
+    where
+        T: DeserializeOwned,
+    {
+        let uri = format!("{}{entity}/{entity_id}/{subentity}", self.base_url());
+        let mut response = serde_json::Value::Null;
+        for i in 1..6 {
+            log::debug!("Connecting {uri}, try {i}");
+            match self
+                .client
+                .get(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .send()
+                .await
+            {
+                Ok(r) => {
+                    log::debug!("Deserializing response from {uri}");
+                    match r.json().await {
+                        Ok(v) => {
+                            response = v;
+                            break;
+                        }
+                        Err(e) => {
+                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            continue;
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!(
+                        "Failed to connect to {uri} with error: {e}\n{} tries left",
+                        5 - i
+                    );
+                    continue;
+                }
+            }
+        }
+        match serde_json::from_value::<Vec<T>>(response.clone()) {
+            Ok(result) => Ok(result),
+            Err(e) => {
+                let msg = format!("Error getting {uri}\n\n{response:#?}\n\n{e}");
+                Err(msg.into())
+            }
+        }
+    }
+    pub async fn create_subentity<T>(
+        &self,
+        entity: Entity,
+        entity_id: impl std::fmt::Display,
+        subentity: SubEntity,
+        object: impl Serialize,
+    ) -> Result<T>
+    where
+        T: DeserializeOwned,
+    {
+        let uri = format!("{}{entity}/{entity_id}/{subentity}", self.base_url());
+        let mut response = serde_json::Value::Null;
+        for i in 1..6 {
+            log::debug!("Connecting {uri}, try {i}");
+            match self
+                .client
+                .post(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .json(&object)
+                .send()
+                .await
+            {
+                Ok(r) => {
+                    log::debug!("Deserializing response from {uri}");
+                    match r.json().await {
+                        Ok(v) => {
+                            response = v;
+                            break;
+                        }
+                        Err(e) => {
+                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            continue;
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!(
+                        "Failed to connect to {uri} with error: {e}\n{} tries left",
+                        5 - i
+                    );
+                    continue;
+                }
+            }
+        }
+        match serde_json::from_value::<T>(response.clone()) {
+            Ok(result) => Ok(result),
+            Err(e) => {
+                let msg = format!("Error getting {uri} --> {e}\n{response:#?}");
+                Err(msg.into())
+            }
+        }
+    }
+    pub async fn update_subentity<T>(
+        &self,
+        entity: Entity,
+        entity_id: impl std::fmt::Display,
+        subentity: SubEntity,
+        subentity_id: impl std::fmt::Display,
+        object: impl Serialize,
+    ) -> Result<T>
+    where
+        T: DeserializeOwned,
+    {
+        let uri = format!(
+            "{}{entity}/{entity_id}/{subentity}/{subentity_id}",
+            self.base_url()
+        );
+        if subentity == SubEntity::OrderNote {
+            let msg = format!("No such method for {subentity}");
+            return Err(msg.into());
+        }
+        let mut response = serde_json::Value::Null;
+        for i in 1..6 {
+            log::debug!("Connecting {uri}, try {i}");
+            match self
+                .client
+                .put(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .json(&object)
+                .send()
+                .await
+            {
+                Ok(r) => {
+                    log::debug!("Deserializing response from {uri}");
+                    match r.json().await {
+                        Ok(v) => {
+                            response = v;
+                            break;
+                        }
+                        Err(e) => {
+                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            continue;
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!(
+                        "Failed to connect to {uri} with error: {e}\n{} tries left",
+                        5 - i
+                    );
+                    continue;
+                }
+            }
+        }
+        match serde_json::from_value::<T>(response.clone()) {
+            Ok(result) => Ok(result),
+            Err(e) => {
+                let msg = format!("Error getting {uri} - {e}\n{response:#?}");
+                Err(msg.into())
+            }
+        }
+    }
+    pub async fn delete_subentity<T>(
+        &self,
+        entity: Entity,
+        entity_id: impl std::fmt::Display,
+        subentity: SubEntity,
+        subentity_id: impl std::fmt::Display,
+    ) -> Result<T>
+    where
+        T: DeserializeOwned,
+    {
+        let uri = format!(
+            "{}{entity}/{entity_id}/{subentity}/{subentity_id}?force=true",
+            self.base_url()
+        );
+        let mut response = serde_json::Value::Null;
+        for i in 1..6 {
+            log::debug!("Connecting {uri}, try {i}");
+            match self
+                .client
+                .delete(&uri)
+                .basic_auth(self.ck(), Some(self.cs()))
+                .send()
+                .await
+            {
+                Ok(r) => {
+                    log::debug!("Deserializing response from {uri}");
+                    match r.json().await {
+                        Ok(v) => {
+                            response = v;
+                            break;
+                        }
+                        Err(e) => {
+                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            continue;
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!(
+                        "Failed to connect to {uri} with error: {e}\n{} tries left",
+                        5 - i
+                    );
+                    continue;
+                }
+            }
+        }
+        match serde_json::from_value::<T>(response.clone()) {
+            Ok(result) => Ok(result),
+            Err(e) => {
+                let msg = format!("Error getting {uri} - {e}\n{response:#?}");
+                Err(msg.into())
+            }
+        }
+    }
 }
