@@ -679,9 +679,8 @@ mod tests {
     #[tokio::test]
     async fn test_search_order() {
         let client = ApiClient::from_env().unwrap();
-        let orders: Vec<Order> = client.list_all(Entity::Order).await.unwrap();
-        let search_string = orders[0].billing.last_name.clone();
-        let search_result: Vec<Order> = client.search(Entity::Order, &search_string).await.unwrap();
+        let search_string = "Тестов";
+        let search_result: Vec<Order> = client.search(Entity::Order, search_string).await.unwrap();
         assert_eq!(search_string, search_result[0].billing.last_name);
     }
     #[tokio::test]

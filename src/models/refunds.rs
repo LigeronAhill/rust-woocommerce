@@ -75,6 +75,6 @@ pub struct OrderRefundLineItemTaxesProperties {
 }
 impl Refund {
     pub fn create() -> RefundCreateBuilder<NoAmount, NoItems> {
-        RefundCreate::new()
+        RefundCreate::builder()
     }
 }

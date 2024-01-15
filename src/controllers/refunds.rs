@@ -14,7 +14,7 @@ pub struct RefundCreate {
     api_restock: Option<bool>,
 }
 impl RefundCreate {
-    pub fn new() -> RefundCreateBuilder<NoAmount, NoItems> {
+    pub fn builder() -> RefundCreateBuilder<NoAmount, NoItems> {
         RefundCreateBuilder {
             amount: NoAmount,
             line_items: NoItems,
@@ -36,7 +36,7 @@ pub struct OrderRefundLineItemCreate {
     refund_total: Option<f64>,
 }
 impl OrderRefundLineItemCreate {
-    pub fn new() -> OrderRefundLineItemCreateBuilder<NoId, NoQuantity> {
+    pub fn builder() -> OrderRefundLineItemCreateBuilder<NoId, NoQuantity> {
         OrderRefundLineItemCreateBuilder {
             id: NoId,
             quantity: NoQuantity,
@@ -118,7 +118,7 @@ impl<A, I> RefundCreateBuilder<A, I> {
 impl<A> RefundCreateBuilder<A, NoItems> {
     /// Line item data.
     pub fn line_item(self, line_item_id: i32, quatnity: i32) -> RefundCreateBuilder<A, WithItems> {
-        let l = OrderRefundLineItemCreate::new()
+        let l = OrderRefundLineItemCreate::builder()
             .id(line_item_id)
             .quantity(quatnity)
             .build();
@@ -136,7 +136,7 @@ impl<A> RefundCreateBuilder<A, NoItems> {
 impl<A> RefundCreateBuilder<A, WithItems> {
     /// Line item data.
     pub fn line_item(mut self, line_item_id: i32, quatnity: i32) -> Self {
-        let line_item = OrderRefundLineItemCreate::new()
+        let line_item = OrderRefundLineItemCreate::builder()
             .id(line_item_id)
             .quantity(quatnity)
             .build();
