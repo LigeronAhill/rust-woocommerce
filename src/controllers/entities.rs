@@ -566,11 +566,13 @@ where
 #[derive(Debug, Clone, PartialEq)]
 pub enum SubEntity {
     OrderNote,
+    Refund,
 }
 impl std::fmt::Display for SubEntity {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             SubEntity::OrderNote => write!(f, "notes"),
+            SubEntity::Refund => write!(f, "refunds"),
         }
     }
 }
@@ -746,7 +748,7 @@ impl ApiClient {
             "{}{entity}/{entity_id}/{subentity}/{subentity_id}",
             self.base_url()
         );
-        if subentity == SubEntity::OrderNote {
+        if subentity == SubEntity::OrderNote || subentity == SubEntity::Refund {
             let msg = format!("No such method for {subentity}");
             return Err(msg.into());
         }

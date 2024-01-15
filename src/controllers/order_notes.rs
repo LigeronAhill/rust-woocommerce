@@ -111,11 +111,12 @@ mod tests {
     use crate::{
         controllers::{
             entities::{Entity, SubEntity},
+            orders::ORDER_ID,
             ApiClient,
         },
         models::order_notes::OrderNotes,
     };
-    const ORDER_ID: i32 = 3843;
+    // const ORDER_ID: i32 = 4086;
     #[tokio::test]
     async fn test_list_all_order_notes() {
         let client = ApiClient::from_env().unwrap();

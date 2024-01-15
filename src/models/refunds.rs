@@ -1,3 +1,5 @@
+use crate::controllers::refunds::{NoAmount, NoItems, RefundCreate, RefundCreateBuilder};
+
 use super::MetaData;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
@@ -70,4 +72,9 @@ pub struct OrderRefundLineItemTaxesProperties {
     pub subtotal: String,
     // The amount to refund for this tax.
     // pub refund_total: f64,
+}
+impl Refund {
+    pub fn create() -> RefundCreateBuilder<NoAmount, NoItems> {
+        RefundCreate::new()
+    }
 }

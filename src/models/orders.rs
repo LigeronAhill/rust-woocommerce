@@ -27,13 +27,13 @@ pub struct Order {
     /// Currency the order was created with, in ISO format.
     pub currency: CurrencyISO,
     /// The date the order was created, in the site's timezone.
-    pub date_created: NaiveDateTime,
+    pub date_created: Option<NaiveDateTime>,
     /// The date the order was created, as GMT.    
-    pub date_created_gmt: NaiveDateTime,
+    pub date_created_gmt: Option<NaiveDateTime>,
     ///The date the order was last modified, in the site's timezone.
-    pub date_modified: NaiveDateTime,
+    pub date_modified: Option<NaiveDateTime>,
     /// The date the order was last modified, as GMT
-    pub date_modified_gmt: NaiveDateTime,
+    pub date_modified_gmt: Option<NaiveDateTime>,
     /// Total discount amount for the order.
     pub discount_total: String,
     /// Total discount tax amount for the order.
@@ -115,6 +115,7 @@ pub enum OrderStatus {
     Refunded,
     Failed,
     Trash,
+    Draft,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrderLineItemProperties {
