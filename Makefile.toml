@@ -30,7 +30,8 @@ dependencies = ["build"]
 [tasks.tarpaulin]
 command = "cargo"
 args = ["tarpaulin", "--ignore-tests"]
-dependencies = ["audit"]
+# dependencies = ["audit"]
+dependencies = ["clippy"]
 
 [tasks.prepare]
 dependencies = ["test", "tarpaulin"]

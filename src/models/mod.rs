@@ -30,7 +30,7 @@ pub mod webhooks;
 #[skip_serializing_none]
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct MetaData {
-    pub id: Option<i64>,
+    pub id: Option<i32>,
     pub key: String,
     pub value: serde_json::Value,
 }

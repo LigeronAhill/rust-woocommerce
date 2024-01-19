@@ -386,54 +386,54 @@ impl ProductModifyBuilder {
         });
         self
     }
-    pub fn build(self) -> ProductModify {
+    pub fn build(&self) -> ProductModify {
         ProductModify {
             id: self.id,
-            name: self.name,
-            slug: self.slug,
-            permalink: self.permalink,
-            product_type: self.product_type,
-            status: self.status,
+            name: self.name.clone(),
+            slug: self.slug.clone(),
+            permalink: self.permalink.clone(),
+            product_type: self.product_type.clone(),
+            status: self.status.clone(),
             featured: self.featured,
-            catalog_visibility: self.catalog_visibility,
-            description: self.description,
-            short_description: self.short_description,
-            sku: self.sku,
-            regular_price: self.regular_price,
-            sale_price: self.sale_price,
+            catalog_visibility: self.catalog_visibility.clone(),
+            description: self.description.clone(),
+            short_description: self.short_description.clone(),
+            sku: self.sku.clone(),
+            regular_price: self.regular_price.clone(),
+            sale_price: self.sale_price.clone(),
             date_on_sale_from: self.date_on_sale_from,
             date_on_sale_to: self.date_on_sale_to,
             is_virtual: self.is_virtual,
             downloadable: self.downloadable,
-            downloads: self.downloads,
+            downloads: self.downloads.clone(),
             download_limit: self.download_limit,
             download_expiry: self.download_expiry,
-            external_url: self.external_url,
-            button_text: self.button_text,
-            tax_status: self.tax_status,
-            tax_class: self.tax_class,
+            external_url: self.external_url.clone(),
+            button_text: self.button_text.clone(),
+            tax_status: self.tax_status.clone(),
+            tax_class: self.tax_class.clone(),
             manage_stock: self.manage_stock,
             stock_quantity: self.stock_quantity,
-            stock_status: self.stock_status,
-            backorders: self.backorders,
+            stock_status: self.stock_status.clone(),
+            backorders: self.backorders.clone(),
             sold_individually: self.sold_individually,
-            weight: self.weight,
-            dimensions: self.dimensions,
-            shipping_class: self.shipping_class,
+            weight: self.weight.clone(),
+            dimensions: self.dimensions.clone(),
+            shipping_class: self.shipping_class.clone(),
             reviews_allowed: self.reviews_allowed,
-            related_ids: self.related_ids,
-            upsell_ids: self.upsell_ids,
-            cross_sell_ids: self.cross_sell_ids,
+            related_ids: self.related_ids.clone(),
+            upsell_ids: self.upsell_ids.clone(),
+            cross_sell_ids: self.cross_sell_ids.clone(),
             parent_id: self.parent_id,
-            purchase_note: self.purchase_note,
-            categories: self.categories,
-            tags: self.tags,
-            images: self.images,
-            attributes: self.attributes,
-            default_attributes: self.default_attributes,
-            grouped_products: self.grouped_products,
+            purchase_note: self.purchase_note.clone(),
+            categories: self.categories.clone(),
+            tags: self.tags.clone(),
+            images: self.images.clone(),
+            attributes: self.attributes.clone(),
+            default_attributes: self.default_attributes.clone(),
+            grouped_products: self.grouped_products.clone(),
             menu_order: self.menu_order,
-            meta_data: self.meta_data,
+            meta_data: self.meta_data.clone(),
         }
     }
 }
@@ -575,7 +575,7 @@ pub struct DefaultAttributeDTO {
 mod tests {
     use crate::{
         controllers::{entities::Entity, ApiClient},
-        models::products::Product,
+        models::{products::Product, BatchObject},
     };
 
     use super::*;
@@ -604,19 +604,16 @@ mod tests {
     #[tokio::test]
     async fn test_create_product() {
         let client = ApiClient::from_env().unwrap();
-        // let mut product_to_create = std::collections::HashMap::new();
-        // product_to_create.insert("sku", "test product");
-        let mut product_to_create = Product::create();
         let attribute = AttributeDTO::builder()
             .name("Тестовый атрибут")
             .option("69")
             .build();
-        product_to_create
+        let product_to_create = Product::create()
             .name("Тестовый товар")
             .sku("test product")
             .regular_price("10000")
-            .attribute(attribute);
-        let product_to_create = product_to_create.build();
+            .attribute(attribute)
+            .build();
         let created_product: Product = client
             .create(Entity::Product, product_to_create)
             .await
@@ -628,13 +625,20 @@ mod tests {
     #[tokio::test]
     async fn test_update_product() {
         let client = ApiClient::from_env().unwrap();
-        let mut product_to_update = Product::update();
-        product_to_update.regular_price("5000");
-        let product_to_update = product_to_update.build();
+        let product_to_update = Product::update().regular_price("5000").build();
         let updated_product: Product = client
             .update(Entity::Product, 3982, product_to_update)
             .await
             .unwrap();
         assert_eq!(updated_product.id, 3982);
+    }
+    #[tokio::test]
+    async fn test_batch_update_products() {
+        let client = ApiClient::from_env().unwrap();
+        let product_to_update = Product::update().id(3982).regular_price("5000").build();
+        let batch = BatchObject::builder().add_update(product_to_update).build();
+        let updated_products: BatchObject<Product> =
+            client.batch_update(Entity::Product, batch).await.unwrap();
+        assert!(updated_products.update.is_some());
     }
 }

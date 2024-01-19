@@ -5,6 +5,7 @@ pub mod data;
 pub mod entities;
 pub mod order_notes;
 pub mod orders;
+pub mod product_variations;
 pub mod products;
 pub mod refunds;
 pub struct ApiClient {

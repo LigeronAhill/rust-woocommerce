@@ -599,7 +599,8 @@ mod tests {
         let id = search_result.first().unwrap().id;
         let update = Coupon::update().amount("3").id(id).build();
         let batch = BatchObject::builder().add_update(update).build();
-        let batched = client.batch_update(Entity::Coupon, batch).await.unwrap();
-        assert!(!batched.is_empty());
+        let batched: BatchObject<Coupon> =
+            client.batch_update(Entity::Coupon, batch).await.unwrap();
+        assert!(batched.update.is_some());
     }
 }

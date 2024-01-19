@@ -399,18 +399,19 @@ impl ApiClient {
             }
         }
     }
-    pub async fn batch_update<T>(
+    pub async fn batch_update<T, O>(
         &self,
         entity: Entity,
-        batch_object: BatchObject<T>,
-    ) -> Result<Vec<BatchObject<T>>>
+        batch_object: BatchObject<O>,
+    ) -> Result<BatchObject<T>>
     where
         T: DeserializeOwned + Serialize + Clone,
+        O: DeserializeOwned + Serialize + Clone,
     {
         let uri = format!("{}{entity}/batch", self.base_url());
         // By default it's limited to up to 100 objects to be created, updated or deleted.
         let batches = create_batches(&batch_object);
-        let mut modified = Vec::new();
+        let mut modified = BatchObject::builder();
         for batch in batches {
             let mut response = serde_json::Value::Null;
             for i in 1..6 {
@@ -447,7 +448,12 @@ impl ApiClient {
             }
             match serde_json::from_value::<BatchObject<T>>(response.clone()) {
                 Ok(result) => {
-                    modified.push(result);
+                    if let Some(create) = result.create {
+                        modified.extend_create(create);
+                    }
+                    if let Some(update) = result.update {
+                        modified.extend_update(update);
+                    }
                 }
                 Err(_) => {
                     let msg = format!("{response:#?}");
@@ -455,7 +461,7 @@ impl ApiClient {
                 }
             }
         }
-        Ok(modified)
+        Ok(modified.build())
     }
     pub async fn search<T>(
         &self,
@@ -567,12 +573,14 @@ where
 pub enum SubEntity {
     OrderNote,
     Refund,
+    ProductVariation,
 }
 impl std::fmt::Display for SubEntity {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             SubEntity::OrderNote => write!(f, "notes"),
             SubEntity::Refund => write!(f, "refunds"),
+            SubEntity::ProductVariation => write!(f, "variations"),
         }
     }
 }
