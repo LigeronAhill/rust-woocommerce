@@ -4,25 +4,17 @@ use serde_with::skip_serializing_none;
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AttributeTermCreate {
-    /// Term name.
-    pub name: String,
-    /// An alphanumeric identifier for the resource unique to its type.
-    pub slug: Option<String>,
-    /// HTML description of the resource.
-    pub description: Option<String>,
-    /// Menu order, used to custom sort the resource.
-    pub menu_order: Option<i32>,
+    name: String,
+    slug: Option<String>,
+    description: Option<String>,
+    menu_order: Option<i32>,
 }
 #[derive(Default)]
 pub struct AttributeTermCreateBuilder<N> {
-    /// Term name.
-    pub name: N,
-    /// An alphanumeric identifier for the resource unique to its type.
-    pub slug: Option<String>,
-    /// HTML description of the resource.
-    pub description: Option<String>,
-    /// Menu order, used to custom sort the resource.
-    pub menu_order: Option<i32>,
+    name: N,
+    slug: Option<String>,
+    description: Option<String>,
+    menu_order: Option<i32>,
 }
 #[derive(Default)]
 pub struct WithName(String);
@@ -67,29 +59,19 @@ impl AttributeTermCreateBuilder<WithName> {
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AttributeTermUpdate {
-    /// Unique identifier for the resource.
-    pub id: Option<i32>,
-    /// Term name.
-    pub name: Option<String>,
-    /// An alphanumeric identifier for the resource unique to its type.
-    pub slug: Option<String>,
-    /// HTML description of the resource.
-    pub description: Option<String>,
-    /// Menu order, used to custom sort the resource.
-    pub menu_order: Option<i32>,
+    id: Option<i32>,
+    name: Option<String>,
+    slug: Option<String>,
+    description: Option<String>,
+    menu_order: Option<i32>,
 }
 #[derive(Default)]
 pub struct AttributeTermUpdateBuilder {
-    /// Unique identifier for the resource.
-    pub id: Option<i32>,
-    /// Term name.
-    pub name: Option<String>,
-    /// An alphanumeric identifier for the resource unique to its type.
-    pub slug: Option<String>,
-    /// HTML description of the resource.
-    pub description: Option<String>,
-    /// Menu order, used to custom sort the resource.
-    pub menu_order: Option<i32>,
+    id: Option<i32>,
+    name: Option<String>,
+    slug: Option<String>,
+    description: Option<String>,
+    menu_order: Option<i32>,
 }
 impl AttributeTermUpdateBuilder {
     /// Unique identifier for the resource.

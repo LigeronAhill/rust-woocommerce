@@ -7,6 +7,7 @@ pub mod order_notes;
 pub mod orders;
 pub mod product_attribute_terms;
 pub mod product_attributes;
+pub mod product_categories;
 pub mod product_variations;
 pub mod products;
 pub mod refunds;
