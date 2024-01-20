@@ -1,4 +1,6 @@
-use crate::controllers::product_variations::ProductVariationUpdateBuilder;
+use crate::controllers::product_variations::{
+    ProductVariationCreateBuilder, ProductVariationUpdateBuilder,
+};
 
 use super::{
     products::{
@@ -95,5 +97,8 @@ pub struct ProductVariation {
 impl ProductVariation {
     pub fn update() -> ProductVariationUpdateBuilder {
         ProductVariationUpdateBuilder::default()
+    }
+    pub fn create() -> ProductVariationCreateBuilder {
+        ProductVariationCreateBuilder::default()
     }
 }

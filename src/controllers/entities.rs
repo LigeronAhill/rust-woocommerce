@@ -5,6 +5,7 @@ use crate::{
     models::{data::Currency, BatchObject},
     Result,
 };
+/// Enum representing the various entities that can be retrieved using the API client.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Entity {
     Coupon,
@@ -61,6 +62,25 @@ impl std::fmt::Display for Entity {
     }
 }
 impl ApiClient {
+    /// Asynchronously retrieves an entity of a specific type.
+    ///
+    /// # Arguments
+    ///
+    /// * `entity` - The type of entity to retrieve.
+    /// * `entity_id` - The ID of the entity to retrieve.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the deserialized entity or an error if retrieval fails.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let attribute_id = 4;
+    /// let result = client
+    ///     .retrieve::<Attribute>(Entity::ProductAttribute, attribute_id)
+    ///     .await?;
+    /// ```
     pub async fn retrieve<T>(&self, entity: Entity, entity_id: impl std::fmt::Display) -> Result<T>
     where
         T: DeserializeOwned,
@@ -106,6 +126,7 @@ impl ApiClient {
             }
         }
     }
+    /// retrieve current currency
     pub async fn retrieve_current_currency(&self) -> Result<Currency> {
         let uri = format!("{}data/currencies/current", self.base_url());
         let mut response = serde_json::Value::Null;
@@ -148,6 +169,23 @@ impl ApiClient {
             }
         }
     }
+    /// Asynchronously lists all entities of a specific type.
+    ///
+    /// # Arguments
+    ///
+    /// * `entity` - The type of entity to list.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing a vector of the retrieved entities or an error if retrieval fails.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let result = client
+    ///     .list_all::<Attribute>(Entity::ProductAttribute)
+    ///     .await?;
+    /// ```
     pub async fn list_all<T>(&self, entity: Entity) -> Result<Vec<T>>
     where
         T: DeserializeOwned,
@@ -159,6 +197,7 @@ impl ApiClient {
             || entity == Entity::Currency
             || entity == Entity::Country
             || entity == Entity::Continent
+            || entity == Entity::ProductAttribute
         {
             let uri = format!("{}{entity}", self.base_url());
             let mut response = serde_json::Value::Null;
@@ -257,6 +296,34 @@ impl ApiClient {
         }
         Ok(result)
     }
+    /// Asynchronously creates entity of a specific type.
+    ///
+    /// # Arguments
+    ///
+    /// * `entity` - The type of entity to list.
+    /// * `object` - The serialized object containing the updated data for the entity.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the created entity or an error if the create fails.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let attribute = AttributeDTO::builder()
+    ///     .name("test attribute")
+    ///     .option("69")
+    ///     .build();
+    /// let product_to_create = Product::create()
+    ///     .name("Test product")
+    ///     .sku("test product")
+    ///     .regular_price("10000")
+    ///     .attribute(attribute)
+    ///     .build();
+    /// let created_product: Product = client
+    ///     .create(Entity::Product, product_to_create)
+    ///     .await?;
+    /// ```
     pub async fn create<T>(&self, entity: Entity, object: impl Serialize) -> Result<T>
     where
         T: DeserializeOwned,
@@ -303,6 +370,27 @@ impl ApiClient {
             }
         }
     }
+    /// Asynchronously updates an entity of a specific type.
+    ///
+    /// # Arguments
+    ///
+    /// * `entity` - The type of entity to update.
+    /// * `entity_id` - The ID of the entity to update.
+    /// * `object` - The serialized object containing the updated data for the entity.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the updated entity or an error if the update fails.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let product_id = 69;
+    /// let product_to_update = Product::update().regular_price("5000").build();
+    /// let updated_product: Product = client
+    ///     .update(Entity::Product, product_id, product_to_update)
+    ///     .await?;
+    /// ```
     pub async fn update<T>(
         &self,
         entity: Entity,
@@ -354,6 +442,23 @@ impl ApiClient {
             }
         }
     }
+    /// Asynchronously deletes an entity of a specific type.
+    ///
+    /// # Arguments
+    ///
+    /// * `entity` - The type of entity to delete.
+    /// * `entity_id` - The ID of the entity to delete.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the deleted entity or an error if the deletion fails.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let id = 69;
+    /// let deleted: Product = client.delete(Entity::Product, id).await?;
+    /// ```
     pub async fn delete<T>(&self, entity: Entity, entity_id: impl std::fmt::Display) -> Result<T>
     where
         T: DeserializeOwned,
@@ -399,6 +504,26 @@ impl ApiClient {
             }
         }
     }
+    /// Asynchronously updates a batch of entities for a specific type.
+    ///
+    /// # Arguments
+    ///
+    /// * `entity` - The type of entity to update.
+    /// * `batch_object` - The batch object containing the entities to update.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the modified batch object or an error if the update fails.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let product_id = 69;
+    /// let product_to_update = Product::update().id(product_id).regular_price("5000").build();
+    /// let batch = BatchObject::builder().add_update(product_to_update).build();
+    /// let updated_products: BatchObject<Product> =
+    ///     client.batch_update(Entity::Product, batch).await?;
+    /// ```
     pub async fn batch_update<T, O>(
         &self,
         entity: Entity,
@@ -463,6 +588,24 @@ impl ApiClient {
         }
         Ok(modified.build())
     }
+    /// Asynchronously searches for entities of a specific type based on a provided search string.
+    ///
+    /// # Arguments
+    ///
+    /// * `entity` - The type of entity to search.
+    /// * `search_string` - The search string used to filter entities.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing a vector of entities matching the search criteria or an error if the search fails.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let search_string = "string to search";
+    /// let search_result: Vec<Product> =
+    ///     client.search(Entity::Product, search_string).await?;
+    /// ```
     pub async fn search<T>(
         &self,
         entity: Entity,
@@ -568,7 +711,7 @@ where
     }
     result_batches
 }
-
+/// Enum representing various sub-entities that can be associated with the main entities.
 #[derive(Debug, Clone, PartialEq)]
 pub enum SubEntity {
     OrderNote,
@@ -585,6 +728,28 @@ impl std::fmt::Display for SubEntity {
     }
 }
 impl ApiClient {
+    /// Asynchronously retrieves a specific subentity of a given entity.
+    ///
+    /// # Arguments
+    ///
+    /// * `entity` - The type of the main entity.
+    /// * `entity_id` - The ID of the main entity.
+    /// * `subentity` - The subentity to retrieve.
+    /// * `subentity_id` - The ID of the subentity to retrieve.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the deserialized subentity or an error if retrieval fails.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let product_id = 69;
+    /// let variation_id = 42;
+    /// let result: ProductVariation = client
+    ///     .retrieve_subentity(Entity::Product, product_id, SubEntity::ProductVariation, variation_id)
+    ///     .await?;
+    /// ```
     pub async fn retrieve_subentity<T>(
         &self,
         entity: Entity,
@@ -639,6 +804,26 @@ impl ApiClient {
             }
         }
     }
+    /// Asynchronously lists all subentities of a specific entity.
+    ///
+    /// # Arguments
+    ///
+    /// * `entity` - The type of the main entity.
+    /// * `entity_id` - The ID of the main entity.
+    /// * `subentity` - The type of subentity to list.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing a vector of the retrieved subentities or an error if retrieval fails.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let product_id = 69;
+    /// let result: Vec<ProductVariation> = client
+    ///     .list_all_subentities(Entity::Product, product_id, SubEntity::ProductVariation)
+    ///     .await?;
+    /// ```
     pub async fn list_all_subentities<T>(
         &self,
         entity: Entity,
@@ -689,6 +874,33 @@ impl ApiClient {
             }
         }
     }
+    /// Asynchronously reates a specific subentity of a given entity.
+    ///
+    /// # Arguments
+    ///
+    /// * `entity` - The type of the main entity.
+    /// * `entity_id` - The ID of the main entity.
+    /// * `subentity` - The type of the subentity to update.
+    /// * `object` - The serialized object containing the data to create for the subentity.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the created subentity or an error if the update fails.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let product_id = 69;
+    /// let variation_to_create = ProductVariation::create().sku("test-sku").build();
+    /// let created: ProductVariation = client
+    ///     .create_subentity(
+    ///         Entity::Product,
+    ///         product_id,
+    ///         SubEntity::ProductVariation,
+    ///         variation_to_create,
+    ///     )
+    ///     .await?;
+    /// ```
     pub async fn create_subentity<T>(
         &self,
         entity: Entity,
@@ -741,6 +953,36 @@ impl ApiClient {
             }
         }
     }
+    /// Asynchronously updates a specific subentity of a given entity.
+    ///
+    /// # Arguments
+    ///
+    /// * `entity` - The type of the main entity.
+    /// * `entity_id` - The ID of the main entity.
+    /// * `subentity` - The type of the subentity to update.
+    /// * `subentity_id` - The ID of the subentity to update.
+    /// * `object` - The serialized object containing the updated data for the subentity.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the updated subentity or an error if the update fails.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let product_id = 69;
+    /// let variation_id = 69;
+    /// let update = ProductVariation::update().regular_price("4000").build();
+    /// let updated: ProductVariation = client
+    ///     .update_subentity(
+    ///         Entity::Product,
+    ///         product_id,
+    ///         SubEntity::ProductVariation,
+    ///         variation_id,
+    ///         update,
+    ///     )
+    ///     .await?;
+    /// ```
     pub async fn update_subentity<T>(
         &self,
         entity: Entity,
@@ -801,6 +1043,28 @@ impl ApiClient {
             }
         }
     }
+    /// Asynchronously deletes a specific subentity of a given entity.
+    ///
+    /// # Arguments
+    ///
+    /// * `entity` - The type of the main entity.
+    /// * `entity_id` - The ID of the main entity.
+    /// * `subentity` - The type of the subentity to delete.
+    /// * `subentity_id` - The ID of the subentity to delete.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the status of the deletion operation or an error if the deletion fails.    
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let product_id = 69;
+    /// let variation_id = 69;
+    /// let deleted: ProductVariation = client
+    ///     .delete_subentity(Entity::Product, product_id, SubEntity::ProductVariation, variation_id)
+    ///     .await?;
+    /// ```
     pub async fn delete_subentity<T>(
         &self,
         entity: Entity,

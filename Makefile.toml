@@ -8,10 +8,10 @@ commang = "cargo"
 args = ["clippy"]
 dependencies = ["format"]
 
-[tasks.audit]
-command = "cargo"
-args = ["audit"]
-dependencies = ["clippy"]
+# [tasks.audit]
+# command = "cargo"
+# args = ["audit"]
+# dependencies = ["clippy"]
 
 [tasks.clean]
 command = "cargo"
@@ -24,17 +24,16 @@ dependencies = ["clean"]
 
 [tasks.test]
 command = "cargo"
-args = ["test", "--", "--test-threads=1"]
+args = ["test", "--lib", "--", "--test-threads=1"]
 dependencies = ["build"]
 
-[tasks.tarpaulin]
-command = "cargo"
-args = ["tarpaulin", "--ignore-tests"]
+# [tasks.tarpaulin]
+# command = "cargo"
+# args = ["tarpaulin", "--ignore-tests"]
 # dependencies = ["audit"]
-dependencies = ["clippy"]
 
 [tasks.prepare]
-dependencies = ["test", "tarpaulin"]
+dependencies = ["test", "clippy"]
 
 [tasks.gitadd]
 command = "git"

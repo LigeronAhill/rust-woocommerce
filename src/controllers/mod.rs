@@ -5,24 +5,46 @@ pub mod data;
 pub mod entities;
 pub mod order_notes;
 pub mod orders;
+pub mod product_attributes;
 pub mod product_variations;
 pub mod products;
 pub mod refunds;
+/// Struct representing the configured API client.
+/// # Example from environment
+/// ```
+/// let client = rust_woocommerce::ApiClient::from_env().unwrap();
+/// let result = client
+///     .list_all::<Attribute>(Entity::ProductAttribute)
+///     .await?;
+/// ```
+/// # Example with builder
+/// ```
+/// let site_url = "google.com";
+/// let customer_key = "super6secret9";
+/// let customer_secret = "customer4secret2";
+/// let client = rust_woocommerce::ApiClient::builder()
+///     .auth(customer_key, customer_secret)
+///     .site_url(site_url)
+///     .build();
+/// ```
 pub struct ApiClient {
     auth: Auth,
     base_url: String,
     client: reqwest::Client,
 }
+/// Struct representing the authentication credentials.
 pub struct Auth {
     ck: String,
     cs: String,
 }
+/// Struct for building an API client with authentication and base URL.
 pub struct ApiClientBuilder<A, B> {
     auth: A,
     base_url: B,
     client: reqwest::Client,
 }
 impl<A, B> ApiClientBuilder<A, B> {
+    /// Sets the authentication credentials for the API client.
     pub fn auth(
         self,
         ck: impl Into<String>,
@@ -41,6 +63,7 @@ impl<A, B> ApiClientBuilder<A, B> {
             client,
         }
     }
+    /// Sets the site URL to be used as the base URL for the API client.
     pub fn site_url(self, url: impl Into<String>) -> ApiClientBuilder<A, WithBaseUrl> {
         let Self { auth, client, .. } = self;
         let base_url = format!("{}/wp-json/wc/v3/", url.into());
@@ -52,6 +75,7 @@ impl<A, B> ApiClientBuilder<A, B> {
     }
 }
 impl ApiClientBuilder<WithAuth, WithBaseUrl> {
+    /// Builds the configured API client with the provided settings.
     pub fn build(self) -> ApiClient {
         let auth = self.auth.0;
         let base_url = self.base_url.0;
@@ -62,9 +86,13 @@ impl ApiClientBuilder<WithAuth, WithBaseUrl> {
         }
     }
 }
+/// Struct representing the absence of authentication.
 pub struct NoAuth;
+/// Struct representing the absence of a base URL.
 pub struct NoBaseUrl;
+/// Wrapper struct for authentication-enabled API client builder.
 pub struct WithAuth(Auth);
+/// Wrapper struct for base-URL-enabled API client builder.
 pub struct WithBaseUrl(String);
 impl ApiClient {
     pub fn from_env() -> Result<Self> {
