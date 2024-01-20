@@ -4,12 +4,14 @@ Library for working with woocommerce API with Rust programming language.
 
 ## Usage
 
-Example:
+From environment:
 
 ```rust
   let client = ApiClient::from_env().unwrap();
   let products: Vec<Product> = client.list_all(Entity::Product).await?;
 ```
+
+With builder:
 
 ```rust
   let site_url = "google.com";
@@ -23,6 +25,8 @@ Example:
       .retrieve_subentity(Entity::Product, 3918, SubEntity::ProductVariation, 4058)
       .await?;
 ```
+
+Create entity:
 
 ```rust
   let attribute = AttributeDTO::builder()
