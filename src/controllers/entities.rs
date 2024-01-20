@@ -717,6 +717,7 @@ pub enum SubEntity {
     OrderNote,
     Refund,
     ProductVariation,
+    AttributeTerm,
 }
 impl std::fmt::Display for SubEntity {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -724,6 +725,7 @@ impl std::fmt::Display for SubEntity {
             SubEntity::OrderNote => write!(f, "notes"),
             SubEntity::Refund => write!(f, "refunds"),
             SubEntity::ProductVariation => write!(f, "variations"),
+            SubEntity::AttributeTerm => write!(f, "terms"),
         }
     }
 }

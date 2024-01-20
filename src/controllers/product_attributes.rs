@@ -6,30 +6,20 @@ use crate::models::product_attributes::{AttributeSortOrder, AttributeType};
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AttributeCreate {
-    /// Attribute name.
-    pub name: String,
-    /// An alphanumeric identifier for the resource unique to its type.
-    pub slug: Option<String>,
-    /// Type of attribute. By default only select is supported.
+    name: String,
+    slug: Option<String>,
     #[serde(rename = "type")]
-    pub attribute_type: Option<AttributeType>,
-    /// Default sort order. Options: menu_order, name, name_num and id. Default is menu_order.
-    pub order_by: Option<AttributeSortOrder>,
-    /// Enable/Disable attribute archives. Default is false.
-    pub has_archives: Option<bool>,
+    attribute_type: Option<AttributeType>,
+    order_by: Option<AttributeSortOrder>,
+    has_archives: Option<bool>,
 }
 #[derive(Default)]
 pub struct AttributeCreateBuilder<N> {
-    /// Attribute name.
-    pub name: N,
-    /// An alphanumeric identifier for the resource unique to its type.
-    pub slug: Option<String>,
-    /// Type of attribute. By default only select is supported.
-    pub attribute_type: Option<AttributeType>,
-    /// Default sort order. Options: menu_order, name, name_num and id. Default is menu_order.
-    pub order_by: Option<AttributeSortOrder>,
-    /// Enable/Disable attribute archives. Default is false.
-    pub has_archives: Option<bool>,
+    name: N,
+    slug: Option<String>,
+    attribute_type: Option<AttributeType>,
+    order_by: Option<AttributeSortOrder>,
+    has_archives: Option<bool>,
 }
 #[derive(Default)]
 pub struct WithName(String);
@@ -81,34 +71,22 @@ impl AttributeCreateBuilder<WithName> {
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AttributeUpdate {
-    /// Unique identifier for the resource.
-    pub id: Option<i32>,
-    /// Attribute name.
-    pub name: Option<String>,
-    /// An alphanumeric identifier for the resource unique to its type.
-    pub slug: Option<String>,
-    /// Type of attribute. By default only select is supported.
+    id: Option<i32>,
+    name: Option<String>,
+    slug: Option<String>,
     #[serde(rename = "type")]
-    pub attribute_type: Option<AttributeType>,
-    /// Default sort order. Options: menu_order, name, name_num and id. Default is menu_order.
-    pub order_by: Option<AttributeSortOrder>,
-    /// Enable/Disable attribute archives. Default is false.
-    pub has_archives: Option<bool>,
+    attribute_type: Option<AttributeType>,
+    order_by: Option<AttributeSortOrder>,
+    has_archives: Option<bool>,
 }
 #[derive(Default)]
 pub struct AttributeUpdateBuilder {
-    /// Unique identifier for the resource.
-    pub id: Option<i32>,
-    /// Attribute name.
-    pub name: Option<String>,
-    /// An alphanumeric identifier for the resource unique to its type.
-    pub slug: Option<String>,
-    /// Type of attribute. By default only select is supported.
-    pub attribute_type: Option<AttributeType>,
-    /// Default sort order. Options: menu_order, name, name_num and id. Default is menu_order.
-    pub order_by: Option<AttributeSortOrder>,
-    /// Enable/Disable attribute archives. Default is false.
-    pub has_archives: Option<bool>,
+    id: Option<i32>,
+    name: Option<String>,
+    slug: Option<String>,
+    attribute_type: Option<AttributeType>,
+    order_by: Option<AttributeSortOrder>,
+    has_archives: Option<bool>,
 }
 impl AttributeUpdateBuilder {
     /// Unique identifier for the resource.
