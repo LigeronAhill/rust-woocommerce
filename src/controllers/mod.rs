@@ -14,6 +14,7 @@ pub mod product_tags;
 pub mod product_variations;
 pub mod products;
 pub mod refunds;
+pub mod reports;
 /// Struct representing the configured API client.
 /// # Example from environment
 /// ```

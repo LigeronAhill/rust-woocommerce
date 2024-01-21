@@ -18,6 +18,11 @@ pub enum Entity {
     ProductTag,
     ProductReview,
     Report,
+    ReportCouponsTotal,
+    ReportCustomersTotal,
+    ReportOrdersTotal,
+    ReportProductsTotal,
+    ReportReviewsTotal,
     TaxRate,
     TaxClass,
     Webhook,
@@ -58,6 +63,11 @@ impl std::fmt::Display for Entity {
             Entity::Country => write!(f, "data/countries"),
             Entity::Continent => write!(f, "data/continents"),
             Entity::CurrentCurrency => write!(f, "data/currencies/current"),
+            Entity::ReportCouponsTotal => write!(f, "reports/coupons/totals"),
+            Entity::ReportCustomersTotal => write!(f, "reports/customers/totals"),
+            Entity::ReportOrdersTotal => write!(f, "reports/orders/totals"),
+            Entity::ReportProductsTotal => write!(f, "reports/products/totals"),
+            Entity::ReportReviewsTotal => write!(f, "reports/reviews/totals"),
         }
     }
 }
@@ -198,6 +208,12 @@ impl ApiClient {
             || entity == Entity::Country
             || entity == Entity::Continent
             || entity == Entity::ProductAttribute
+            || entity == Entity::Report
+            || entity == Entity::ReportCouponsTotal
+            || entity == Entity::ReportCustomersTotal
+            || entity == Entity::ReportOrdersTotal
+            || entity == Entity::ReportProductsTotal
+            || entity == Entity::ReportReviewsTotal
         {
             let uri = format!("{}{entity}", self.base_url());
             let mut response = serde_json::Value::Null;
