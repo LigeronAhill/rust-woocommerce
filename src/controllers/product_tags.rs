@@ -107,7 +107,7 @@ impl ProductTagUpdateBuilder {
 }
 #[cfg(test)]
 mod tests {
-    use crate::{models::product_tags::ProductTag, ApiClient, BatchObject, Entity};
+    use crate::{product_tags::ProductTag, ApiClient, BatchObject, Entity};
 
     #[tokio::test]
     async fn test_list_all_product_tags() {

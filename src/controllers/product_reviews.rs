@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::models::product_reviews::ReviewStatus;
+use crate::product_reviews::ReviewStatus;
+
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProductReviewCreate {
@@ -208,7 +209,7 @@ impl ProductReviewUpdateBuilder {
 #[cfg(test)]
 mod tests {
     use crate::{
-        models::product_reviews::{ProductReview, ReviewStatus},
+        product_reviews::{ProductReview, ReviewStatus},
         ApiClient, BatchObject, Entity,
     };
 

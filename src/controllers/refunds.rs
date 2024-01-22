@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::models::MetaData;
+use crate::MetaData;
+
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RefundCreate {
@@ -290,14 +291,8 @@ impl OrderRefundLineItemCreateBuilder<WithId, WithQuantity> {
 }
 #[cfg(test)]
 mod tests {
-    use crate::{
-        controllers::{
-            entities::{Entity, SubEntity},
-            orders::ORDER_ID,
-            ApiClient,
-        },
-        models::refunds::Refund,
-    };
+    use crate::{controllers::orders::ORDER_ID, refunds::Refund, ApiClient, Entity, SubEntity};
+
     #[tokio::test]
     async fn test_list_all_refunds() {
         let client = ApiClient::from_env().unwrap();

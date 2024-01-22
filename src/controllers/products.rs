@@ -1,12 +1,13 @@
-use crate::models::{
+use chrono::NaiveDateTime;
+use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
+
+use crate::{
     products::{
         BackordersStatus, CatalogVisibility, ProductStatus, ProductType, StockStatus, TaxStatus,
     },
     MetaData,
 };
-use chrono::NaiveDateTime;
-use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProductModify {
@@ -573,10 +574,8 @@ pub struct DefaultAttributeDTO {
 }
 #[cfg(test)]
 mod tests {
-    use crate::{
-        controllers::{entities::Entity, ApiClient},
-        models::{products::Product, BatchObject},
-    };
+
+    use crate::{products::Product, ApiClient, BatchObject, Entity};
 
     use super::*;
     #[tokio::test]

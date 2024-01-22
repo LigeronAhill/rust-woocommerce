@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
     use crate::{
-        controllers::{entities::Entity, ApiClient},
-        models::data::{Continent, Country, Currency, Data},
+        data::{Continent, Country, Currency, Data},
+        ApiClient, Entity,
     };
 
     #[tokio::test]

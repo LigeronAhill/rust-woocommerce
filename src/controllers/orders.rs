@@ -1,11 +1,10 @@
-use crate::models::{
+pub const ORDER_ID: i32 = 4086;
+use crate::{
     customers::{Billing, Shipping},
     data::CurrencyISO,
     orders::{OrderStatus, TaxStatus},
-    MetaData,
+    MetaData, Result,
 };
-pub const ORDER_ID: i32 = 4086;
-use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 #[skip_serializing_none]

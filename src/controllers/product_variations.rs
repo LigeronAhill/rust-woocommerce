@@ -2,12 +2,20 @@ use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::models::{
-    products::{BackordersStatus, Dimensions, ProductStatus, StockStatus, TaxStatus},
+use crate::{
+    orders::TaxStatus,
+    products::{BackordersStatus, Dimensions, ProductStatus, StockStatus},
     MetaData,
 };
 
 use super::products::{DefaultAttributeDTO, DownloadDTO, ImageDTO};
+
+// use crate::models::{
+//     products::{BackordersStatus, Dimensions, ProductStatus, StockStatus, TaxStatus},
+//     MetaData,
+// };
+
+// use super::products::{DefaultAttributeDTO, DownloadDTO, ImageDTO};
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -523,13 +531,7 @@ impl ProductVariationUpdateBuilder {
 }
 #[cfg(test)]
 mod tests {
-    use crate::{
-        controllers::{
-            entities::{Entity, SubEntity},
-            ApiClient,
-        },
-        models::product_variations::ProductVariation,
-    };
+    use crate::{product_variations::ProductVariation, ApiClient, Entity, SubEntity};
 
     #[tokio::test]
     async fn test_list_all_product_variations() {

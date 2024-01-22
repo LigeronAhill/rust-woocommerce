@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::models::product_categories::DisplayOption;
+use crate::product_categories::DisplayOption;
 
 use super::products::ImageDTO;
+
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CategoryCreate {
@@ -170,7 +171,7 @@ impl CategoryUpdateBuilder {
 #[cfg(test)]
 mod tests {
     use crate::{
-        models::product_categories::{Category, DisplayOption},
+        product_categories::{Category, DisplayOption},
         ApiClient, BatchObject, Entity,
     };
 

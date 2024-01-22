@@ -2,7 +2,8 @@ use serde_with::skip_serializing_none;
 
 use serde::{Deserialize, Serialize};
 
-use crate::models::product_attributes::{AttributeSortOrder, AttributeType};
+use crate::product_attributes::{AttributeSortOrder, AttributeType};
+
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AttributeCreate {
@@ -139,9 +140,8 @@ impl AttributeUpdateBuilder {
 #[cfg(test)]
 mod tests {
     use crate::{
-        controllers::entities::Entity,
-        models::product_attributes::{Attribute, AttributeSortOrder},
-        ApiClient, BatchObject,
+        product_attributes::{Attribute, AttributeSortOrder},
+        ApiClient, BatchObject, Entity,
     };
 
     #[tokio::test]

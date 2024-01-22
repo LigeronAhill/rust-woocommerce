@@ -1,4 +1,3 @@
-// use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 #[skip_serializing_none]
@@ -109,14 +108,9 @@ impl OrderNotesUpdateBuilder<WithId> {
 #[cfg(test)]
 mod tests {
     use crate::{
-        controllers::{
-            entities::{Entity, SubEntity},
-            orders::ORDER_ID,
-            ApiClient,
-        },
-        models::order_notes::OrderNotes,
+        controllers::orders::ORDER_ID, order_notes::OrderNotes, ApiClient, Entity, SubEntity,
     };
-    // const ORDER_ID: i32 = 4086;
+
     #[tokio::test]
     async fn test_list_all_order_notes() {
         let client = ApiClient::from_env().unwrap();

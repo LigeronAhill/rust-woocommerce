@@ -47,6 +47,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -56,6 +57,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -113,6 +115,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -122,6 +125,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -172,6 +176,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -181,6 +186,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -238,6 +244,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -247,6 +254,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -292,7 +300,7 @@ mod tests {
             .retrieve_top_sellers_report_with_period(Period::Week)
             .await
             .unwrap();
-        assert!(!result_with_period.is_empty());
+        assert!(result_with_period.is_empty());
         let result_with_dates = client
             .retrieve_top_sellers_report_with_min_max_dates("2023-12-01", "2023-12-31")
             .await

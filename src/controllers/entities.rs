@@ -1,10 +1,7 @@
 use serde::{de::DeserializeOwned, Serialize};
 
-use super::ApiClient;
-use crate::{
-    models::{data::Currency, BatchObject},
-    Result,
-};
+use crate::{data::Currency, ApiClient, BatchObject, Result};
+
 /// Enum representing the various entities that can be retrieved using the API client.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Entity {
@@ -115,6 +112,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -124,6 +122,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -158,6 +157,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -167,6 +167,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -235,6 +236,7 @@ impl ApiClient {
                             }
                             Err(e) => {
                                 log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                                tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                                 continue;
                             }
                         }
@@ -244,6 +246,7 @@ impl ApiClient {
                             "Failed to connect to {uri} with error: {e}\n{} tries left",
                             5 - i
                         );
+                        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                         continue;
                     }
                 }
@@ -282,6 +285,8 @@ impl ApiClient {
                                 }
                                 Err(e) => {
                                     log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                                    tokio::time::sleep(tokio::time::Duration::from_millis(500))
+                                        .await;
                                     continue;
                                 }
                             }
@@ -291,6 +296,7 @@ impl ApiClient {
                                 "Failed to connect to {uri} with error: {e}\n{} tries left",
                                 5 - i
                             );
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -365,6 +371,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -374,6 +381,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -437,6 +445,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -446,6 +455,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -499,6 +509,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -508,6 +519,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -574,6 +586,7 @@ impl ApiClient {
                             }
                             Err(e) => {
                                 log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                                tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                                 continue;
                             }
                         }
@@ -583,6 +596,7 @@ impl ApiClient {
                             "Failed to connect to {uri} with error: {e}\n{} tries left",
                             5 - i
                         );
+                        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                         continue;
                     }
                 }
@@ -658,6 +672,7 @@ impl ApiClient {
                             }
                             Err(e) => {
                                 log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                                tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                                 continue;
                             }
                         }
@@ -667,6 +682,7 @@ impl ApiClient {
                             "Failed to connect to {uri} with error: {e}\n{} tries left",
                             5 - i
                         );
+                        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                         continue;
                     }
                 }
@@ -801,6 +817,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -810,6 +827,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -871,6 +889,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -880,6 +899,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -950,6 +970,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -959,6 +980,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -1040,6 +1062,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -1049,6 +1072,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
@@ -1116,6 +1140,7 @@ impl ApiClient {
                         }
                         Err(e) => {
                             log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
@@ -1125,6 +1150,7 @@ impl ApiClient {
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }

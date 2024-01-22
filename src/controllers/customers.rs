@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::models::{
+use crate::{
     customers::{Billing, Shipping},
     MetaData,
 };
+
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateCustomer {
@@ -454,12 +455,8 @@ impl UpdateCustomerBuilder {
 }
 #[cfg(test)]
 mod tests {
-    use crate::{
-        controllers::{entities::Entity, ApiClient},
-        models::customers::Customer,
-    };
+    use crate::{customers::Customer, ApiClient, Entity};
 
-    // use super::*;
     #[tokio::test]
     async fn test_list_all_customers() {
         let client = ApiClient::from_env().unwrap();

@@ -111,7 +111,8 @@ impl AttributeTermUpdateBuilder {
 }
 #[cfg(test)]
 mod tests {
-    use crate::{models::product_attribute_terms::AttributeTerm, ApiClient, Entity, SubEntity};
+    use crate::{product_attribute_terms::AttributeTerm, ApiClient, Entity, SubEntity};
+
     const ATTRIBUTE_ID: i32 = 2;
     const ATTRIBUTE_TERM_ID: i32 = 240;
     #[tokio::test]

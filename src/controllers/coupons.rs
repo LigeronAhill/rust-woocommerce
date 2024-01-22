@@ -1,6 +1,6 @@
 use serde_with::skip_serializing_none;
 
-use crate::models::{coupons::DiscountType, MetaData};
+use crate::{coupons::DiscountType, MetaData};
 #[skip_serializing_none]
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Default)]
 pub struct CreateCoupon {
@@ -480,10 +480,8 @@ impl UpdateCouponBuilder {
 }
 #[cfg(test)]
 mod tests {
-    use crate::{
-        controllers::{entities::Entity, ApiClient},
-        models::{coupons::Coupon, BatchObject},
-    };
+
+    use crate::{coupons::Coupon, ApiClient, BatchObject, Entity};
 
     use super::*;
     #[tokio::test]

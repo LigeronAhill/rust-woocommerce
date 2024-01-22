@@ -93,7 +93,7 @@ impl ShippingClassUpdateBuilder {
 }
 #[cfg(test)]
 mod tests {
-    use crate::{models::product_shipping_classes::ShippingClass, ApiClient, BatchObject, Entity};
+    use crate::{product_shipping_classes::ShippingClass, ApiClient, BatchObject, Entity};
 
     #[tokio::test]
     async fn test_list_all_shipping_classes() {
