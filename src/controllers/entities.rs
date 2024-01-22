@@ -215,6 +215,7 @@ impl ApiClient {
             || entity == Entity::ReportOrdersTotal
             || entity == Entity::ReportProductsTotal
             || entity == Entity::ReportReviewsTotal
+            || entity == Entity::TaxClass
         {
             let uri = format!("{}{entity}", self.base_url());
             let mut response = serde_json::Value::Null;
@@ -425,6 +426,9 @@ impl ApiClient {
         T: DeserializeOwned,
     {
         let uri = format!("{}{entity}/{entity_id}", self.base_url());
+        if entity == Entity::TaxClass {
+            return Err("method not allowed".into());
+        }
         let mut response = serde_json::Value::Null;
         for i in 1..6 {
             log::debug!("Connecting {uri}, try {i}");
