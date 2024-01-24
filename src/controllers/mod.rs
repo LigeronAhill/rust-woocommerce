@@ -17,6 +17,7 @@ pub mod refunds;
 pub mod reports;
 pub mod tax_classes;
 pub mod tax_rates;
+pub mod webhooks;
 /// Struct representing the configured API client.
 /// # Example from environment
 /// ```
