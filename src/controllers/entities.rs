@@ -216,6 +216,7 @@ impl ApiClient {
             || entity == Entity::ReportProductsTotal
             || entity == Entity::ReportReviewsTotal
             || entity == Entity::TaxClass
+            || entity == Entity::Setting
         {
             let uri = format!("{}{entity}", self.base_url());
             let mut response = serde_json::Value::Null;
@@ -754,6 +755,7 @@ pub enum SubEntity {
     Refund,
     ProductVariation,
     AttributeTerm,
+    SettingOption,
 }
 impl std::fmt::Display for SubEntity {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -762,6 +764,7 @@ impl std::fmt::Display for SubEntity {
             SubEntity::Refund => write!(f, "refunds"),
             SubEntity::ProductVariation => write!(f, "variations"),
             SubEntity::AttributeTerm => write!(f, "terms"),
+            SubEntity::SettingOption => write!(f, "setting_option"),
         }
     }
 }
@@ -798,10 +801,14 @@ impl ApiClient {
     where
         T: DeserializeOwned,
     {
-        let uri = format!(
-            "{}{entity}/{entity_id}/{subentity}/{subentity_id}",
-            self.base_url()
-        );
+        let uri = if subentity != SubEntity::SettingOption {
+            format!(
+                "{}{entity}/{entity_id}/{subentity}/{subentity_id}",
+                self.base_url()
+            )
+        } else {
+            format!("{}settings/{entity_id}/{subentity_id}", self.base_url())
+        };
         let mut response = serde_json::Value::Null;
         for i in 1..6 {
             log::debug!("Connecting {uri}, try {i}");
@@ -1038,10 +1045,14 @@ impl ApiClient {
     where
         T: DeserializeOwned,
     {
-        let uri = format!(
-            "{}{entity}/{entity_id}/{subentity}/{subentity_id}",
-            self.base_url()
-        );
+        let uri = if subentity != SubEntity::SettingOption {
+            format!(
+                "{}{entity}/{entity_id}/{subentity}/{subentity_id}",
+                self.base_url()
+            )
+        } else {
+            format!("{}{entity}/{entity_id}/{subentity_id}", self.base_url())
+        };
         if subentity == SubEntity::OrderNote || subentity == SubEntity::Refund {
             let msg = format!("No such method for {subentity}");
             return Err(msg.into());
