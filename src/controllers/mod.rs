@@ -17,6 +17,7 @@ pub mod products;
 pub mod refunds;
 pub mod reports;
 pub mod settings;
+pub mod shipping_zones;
 pub mod tax_classes;
 pub mod tax_rates;
 pub mod webhooks;

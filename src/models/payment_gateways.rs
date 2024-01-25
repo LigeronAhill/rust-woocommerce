@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::controllers::payment_gateways::PaymentGatewayUpdate;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PaymentGateway {
     /// Payment gateway ID.
@@ -20,6 +22,14 @@ pub struct PaymentGateway {
     pub method_supports: Vec<String>,
     /// Payment gateway settings.
     pub settings: PaymentGatewaySettings,
+}
+impl PaymentGateway {
+    pub fn turn_on() -> PaymentGatewayUpdate {
+        PaymentGatewayUpdate { enabled: true }
+    }
+    pub fn turn_off() -> PaymentGatewayUpdate {
+        PaymentGatewayUpdate { enabled: false }
+    }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PaymentGatewaySettings {

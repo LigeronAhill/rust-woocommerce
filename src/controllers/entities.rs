@@ -218,6 +218,7 @@ impl ApiClient {
             || entity == Entity::TaxClass
             || entity == Entity::Setting
             || entity == Entity::PaymentGateway
+            || entity == Entity::ShippingZone
         {
             let uri = format!("{}{entity}", self.base_url());
             let mut response = serde_json::Value::Null;

@@ -1,3 +1,10 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PaymentGatewayUpdate {
+    /// Payment gateway enabled status.
+    pub enabled: bool,
+}
 #[cfg(test)]
 mod tests {
     use crate::{payment_gateways::PaymentGateway, ApiClient, Entity};
@@ -21,8 +28,7 @@ mod tests {
     #[tokio::test]
     async fn test_update_payment_gateway() {
         let client = ApiClient::from_env().unwrap();
-        let mut update = std::collections::HashMap::new();
-        update.insert("enabled", false);
+        let update = PaymentGateway::turn_off();
         let id = "cheque";
         let updated: PaymentGateway = client
             .update(Entity::PaymentGateway, id, update)
