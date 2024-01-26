@@ -26,6 +26,7 @@ pub enum Entity {
     Setting,
     PaymentGateway,
     ShippingZone,
+    ShippingMethod,
     SystemStatus,
     SystemStatusTool,
     Data,
@@ -65,6 +66,7 @@ impl std::fmt::Display for Entity {
             Entity::ReportOrdersTotal => write!(f, "reports/orders/totals"),
             Entity::ReportProductsTotal => write!(f, "reports/products/totals"),
             Entity::ReportReviewsTotal => write!(f, "reports/reviews/totals"),
+            Entity::ShippingMethod => write!(f, "shipping_methods"),
         }
     }
 }
@@ -219,6 +221,9 @@ impl ApiClient {
             || entity == Entity::Setting
             || entity == Entity::PaymentGateway
             || entity == Entity::ShippingZone
+            || entity == Entity::ShippingMethod
+            || entity == Entity::SystemStatus
+            || entity == Entity::SystemStatusTool
         {
             let uri = format!("{}{entity}", self.base_url());
             let mut response = serde_json::Value::Null;
@@ -255,13 +260,25 @@ impl ApiClient {
                     }
                 }
             }
-            match serde_json::from_value::<Vec<T>>(response.clone()) {
-                Ok(result) => {
-                    return Ok(result);
+            if entity != Entity::SystemStatus {
+                match serde_json::from_value::<Vec<T>>(response.clone()) {
+                    Ok(result) => {
+                        return Ok(result);
+                    }
+                    Err(e) => {
+                        let msg = format!("Error getting {uri}\n\n{response:#?}\n\n{e}");
+                        return Err(msg.into());
+                    }
                 }
-                Err(e) => {
-                    let msg = format!("Error getting {uri}\n\n{response:#?}\n\n{e}");
-                    return Err(msg.into());
+            } else {
+                match serde_json::from_value::<T>(response.clone()) {
+                    Ok(result) => {
+                        return Ok(vec![result]);
+                    }
+                    Err(e) => {
+                        let msg = format!("Error getting {uri}\n\n{response:#?}\n\n{e}");
+                        return Err(msg.into());
+                    }
                 }
             }
         } else {
@@ -758,6 +775,8 @@ pub enum SubEntity {
     ProductVariation,
     AttributeTerm,
     SettingOption,
+    ShippingZoneLocation,
+    ShippingZoneMethod,
 }
 impl std::fmt::Display for SubEntity {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -767,6 +786,8 @@ impl std::fmt::Display for SubEntity {
             SubEntity::ProductVariation => write!(f, "variations"),
             SubEntity::AttributeTerm => write!(f, "terms"),
             SubEntity::SettingOption => write!(f, "setting_option"),
+            SubEntity::ShippingZoneLocation => write!(f, "locations"),
+            SubEntity::ShippingZoneMethod => write!(f, "methods"),
         }
     }
 }
