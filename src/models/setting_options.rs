@@ -1,6 +1,41 @@
 use serde::{Deserialize, Serialize};
 
 use crate::controllers::settings::SettingOptionUpdate;
+/// ```rust
+///     let client = ApiClient::from_env()?;
+///     let upd = SettingOption::update("no");
+///     let updated: SettingOption = client
+///         .update_subentity(
+///             Entity::Setting,
+///             group_id,
+///             SubEntity::SettingOption,
+///             option_id,
+///             upd,
+///         )
+///         .await?;
+///     let upd = SettingOption::update("yes");
+///     let updated: SettingOption = client
+///         .update_subentity(
+///             Entity::Setting,
+///             group_id,
+///             SubEntity::SettingOption,
+///             option_id,
+///             upd,
+///         )
+///         .await?;
+///      let opts: Vec<SettingOption> = client
+///             .retrieve(Entity::Setting, group_id)
+///             .await?;
+///      if let Some(first_opt) = opts.first() {
+///          let option: SettingOption = client
+///              .retrieve_subentity(
+///                  Entity::Setting,
+///                  group_id,
+///                  SubEntity::SettingOption,
+///                  first_opt.id.to_owned(),
+///              )
+///              .await?;
+/// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingOption {
     /// A unique identifier for the setting.

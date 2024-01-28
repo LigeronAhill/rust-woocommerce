@@ -1,11 +1,24 @@
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
-
+/// ```rust
+///     let client = ApiClient::from_env()?;
+///     let reports = client.list_all::<Report>(Entity::Report).await?;
+/// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Report {
     pub slug: String,
     pub description: String,
 }
+
+/// ```rust
+///     let client = ApiClient::from_env()?;
+///     let result_with_period = client
+///         .retrieve_sales_report_with_period(Period::Week)
+///         .await?;
+///     let result_with_dates = client
+///         .retrieve_sales_report_with_min_max_dates("2023-12-01", "2023-12-31")
+///         .await?;
+/// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SaleReport {
     /// Gross sales in the period.
@@ -60,6 +73,16 @@ impl std::fmt::Display for Period {
         }
     }
 }
+
+/// ```rust
+///     let client = ApiClient::from_env()?;
+///     let result_with_period = client
+///         .retrieve_top_sellers_report_with_period(Period::Week)
+///         .await?;
+///     let result_with_dates = client
+///         .retrieve_top_sellers_report_with_min_max_dates("2023-12-01", "2023-12-31")
+///         .await?;
+/// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TopSellersReport {
     /// Product title.
@@ -69,6 +92,17 @@ pub struct TopSellersReport {
     /// Total number of purchases.
     pub quantity: i32,
 }
+
+/// ```rust
+///     let client = ApiClient::from_env()?;
+///     let coupons: Vec<ReportTotals> = client.list_all(Entity::ReportCouponsTotal).await?;
+///     let customers: Vec<ReportTotals> =
+///         client.list_all(Entity::ReportCustomersTotal).await?;
+///     let orders: Vec<ReportTotals> = client.list_all(Entity::ReportOrdersTotal).await?;
+///     let products: Vec<ReportTotals> =
+///         client.list_all(Entity::ReportProductsTotal).await?;
+///     let reviews: Vec<ReportTotals> = client.list_all(Entity::ReportReviewsTotal).await?;
+/// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReportTotals {
     pub slug: String,

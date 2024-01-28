@@ -1,5 +1,20 @@
 use serde::{Deserialize, Serialize};
-
+/// ```rust
+/// #[cfg(test)]
+/// mod tests {
+///     use crate::{system_status::SystemStatus, ApiClient};
+///
+///     #[tokio::test]
+///     async fn test_list_all_system_status() {
+///         let client = ApiClient::from_env().unwrap();
+///         let result = client
+///             .list_all::<SystemStatus>(crate::Entity::SystemStatus)
+///             .await
+///             .unwrap();
+///         assert_eq!(result.len(), 1);
+///     }
+/// }
+/// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SystemStatus {
     /// Environment.
@@ -76,11 +91,11 @@ pub struct Environment {
     /// Remote POST successful?
     pub remote_post_successful: bool,
     /// Remote POST response.
-    pub remote_post_response: String,
+    pub remote_post_response: serde_json::Value,
     /// Remote GET successful?
     pub remote_get_successful: bool,
     /// Remote GET response.
-    pub remote_get_response: String,
+    pub remote_get_response: serde_json::Value,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Database {

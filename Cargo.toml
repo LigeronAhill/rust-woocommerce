@@ -3,7 +3,7 @@ name = "rust-woocommerce"
 description = "Framework for woocommerce"
 version = "0.1.0"
 edition = "2021"
-authors = ["Ligeron.Ahill"]
+authors = ["Aleksandr Provotorov <provotorov@inbox.ru>"]
 license = "MIT"
 rust-version = "1.75"
 

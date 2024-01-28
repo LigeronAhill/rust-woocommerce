@@ -1,4 +1,10 @@
 use serde::{Deserialize, Serialize};
+/// ```rust
+///     let client = ApiClient::from_env()?;
+///     let result = client
+///         .list_all::<SettingGroup>(Entity::Setting)
+///         .await?;
+/// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingGroup {
     /// A unique identifier that can be used to link settings together.
