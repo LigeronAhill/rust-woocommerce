@@ -8,6 +8,7 @@ license = "MIT"
 rust-version = "1.75"
 readme = "README.md"
 repository = "https://github.com/LigeronAhill/rust-woocommerce/"
+exclude = ["Makefile.toml"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
