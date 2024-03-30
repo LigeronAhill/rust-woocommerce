@@ -797,7 +797,7 @@ dependencies = [
 
 [[package]]
 name = "rust-woocommerce"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono",
  "regex",

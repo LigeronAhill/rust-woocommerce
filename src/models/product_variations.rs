@@ -126,7 +126,7 @@ pub struct ProductVariation {
     /// Tax class.
     pub tax_class: String,
     /// Stock management at variation level. Default is false.
-    pub manage_stock: bool,
+    pub manage_stock: ManageStock,
     /// Stock quantity.
     pub stock_quantity: Option<i32>,
     /// Controls the stock status of the product. Options: instock, outofstock, onbackorder. Default is instock.
