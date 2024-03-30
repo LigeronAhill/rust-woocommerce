@@ -470,12 +470,12 @@ pub struct ImageDTO {
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AttributeDTO {
-    pub id: Option<i32>,
-    pub name: String,
-    pub position: Option<i32>,
-    pub visible: bool,
-    pub variation: bool,
-    pub options: Vec<String>,
+    id: Option<i32>,
+    name: String,
+    position: Option<i32>,
+    visible: bool,
+    variation: bool,
+    options: Vec<String>,
 }
 impl AttributeDTO {
     pub fn builder() -> AttributeDTOBuilder<NoName, NoOptions> {
@@ -492,12 +492,12 @@ pub struct Options(Vec<String>);
 pub struct NoOptions;
 #[derive(Default)]
 pub struct AttributeDTOBuilder<N, O> {
-    pub id: Option<i32>,
-    pub name: N,
-    pub position: Option<i32>,
-    pub visible: Option<bool>,
-    pub variation: Option<bool>,
-    pub options: O,
+    id: Option<i32>,
+    name: N,
+    position: Option<i32>,
+    visible: Option<bool>,
+    variation: Option<bool>,
+    options: O,
 }
 impl<N, O> AttributeDTOBuilder<N, O> {
     /// Attribute ID.

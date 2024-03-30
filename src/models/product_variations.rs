@@ -162,3 +162,9 @@ impl ProductVariation {
         ProductVariationCreateBuilder::default()
     }
 }
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum ManageStock {
+    Bool(bool),
+    Parent(String),
+}

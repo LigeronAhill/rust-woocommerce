@@ -97,7 +97,7 @@ impl ApiClient {
         let uri = format!("{}{entity}/{entity_id}", self.base_url());
         let mut response = serde_json::Value::Null;
         for i in 1..6 {
-            log::debug!("Connecting {uri}, try {i}");
+            tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
                 .get(&uri)
@@ -106,21 +106,21 @@ impl ApiClient {
                 .await
             {
                 Ok(r) => {
-                    log::debug!("Deserializing response from {uri}");
+                    tracing::debug!("Deserializing response from {uri}");
                     match r.json().await {
                         Ok(v) => {
                             response = v;
                             break;
                         }
                         Err(e) => {
-                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                             tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
                 }
                 Err(e) => {
-                    log::error!(
+                    tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
@@ -142,7 +142,7 @@ impl ApiClient {
         let uri = format!("{}data/currencies/current", self.base_url());
         let mut response = serde_json::Value::Null;
         for i in 1..6 {
-            log::debug!("Connecting {uri}, try {i}");
+            tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
                 .get(&uri)
@@ -151,21 +151,21 @@ impl ApiClient {
                 .await
             {
                 Ok(r) => {
-                    log::debug!("Deserializing response from {uri}");
+                    tracing::debug!("Deserializing response from {uri}");
                     match r.json().await {
                         Ok(v) => {
                             response = v;
                             break;
                         }
                         Err(e) => {
-                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                             tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
                 }
                 Err(e) => {
-                    log::error!(
+                    tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
@@ -228,7 +228,7 @@ impl ApiClient {
             let uri = format!("{}{entity}", self.base_url());
             let mut response = serde_json::Value::Null;
             for i in 1..6 {
-                log::debug!("Connecting {uri}, try {i}");
+                tracing::debug!("Connecting {uri}, try {i}");
                 match self
                     .client
                     .get(&uri)
@@ -237,21 +237,21 @@ impl ApiClient {
                     .await
                 {
                     Ok(r) => {
-                        log::debug!("Deserializing response from {uri}");
+                        tracing::debug!("Deserializing response from {uri}");
                         match r.json().await {
                             Ok(v) => {
                                 response = v;
                                 break;
                             }
                             Err(e) => {
-                                log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                                tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                                 tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                                 continue;
                             }
                         }
                     }
                     Err(e) => {
-                        log::error!(
+                        tracing::error!(
                             "Failed to connect to {uri} with error: {e}\n{} tries left",
                             5 - i
                         );
@@ -289,7 +289,7 @@ impl ApiClient {
                 );
                 let mut response = serde_json::Value::Null;
                 for i in 1..6 {
-                    log::debug!("Connecting {uri}, try {i}");
+                    tracing::debug!("Connecting {uri}, try {i}");
                     match self
                         .client
                         .get(&uri)
@@ -298,14 +298,14 @@ impl ApiClient {
                         .await
                     {
                         Ok(r) => {
-                            log::debug!("Deserializing response from {uri}");
+                            tracing::debug!("Deserializing response from {uri}");
                             match r.json().await {
                                 Ok(v) => {
                                     response = v;
                                     break;
                                 }
                                 Err(e) => {
-                                    log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                                    tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                                     tokio::time::sleep(tokio::time::Duration::from_millis(500))
                                         .await;
                                     continue;
@@ -313,7 +313,7 @@ impl ApiClient {
                             }
                         }
                         Err(e) => {
-                            log::error!(
+                            tracing::error!(
                                 "Failed to connect to {uri} with error: {e}\n{} tries left",
                                 5 - i
                             );
@@ -374,7 +374,7 @@ impl ApiClient {
         let uri = format!("{}{entity}", self.base_url());
         let mut response = serde_json::Value::Null;
         for i in 1..6 {
-            log::debug!("Connecting {uri}, try {i}");
+            tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
                 .post(&uri)
@@ -384,21 +384,21 @@ impl ApiClient {
                 .await
             {
                 Ok(r) => {
-                    log::debug!("Deserializing response from {uri}");
+                    tracing::debug!("Deserializing response from {uri}");
                     match r.json().await {
                         Ok(v) => {
                             response = v;
                             break;
                         }
                         Err(e) => {
-                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                             tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
                 }
                 Err(e) => {
-                    log::error!(
+                    tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
@@ -451,7 +451,7 @@ impl ApiClient {
         }
         let mut response = serde_json::Value::Null;
         for i in 1..6 {
-            log::debug!("Connecting {uri}, try {i}");
+            tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
                 .put(&uri)
@@ -461,21 +461,21 @@ impl ApiClient {
                 .await
             {
                 Ok(r) => {
-                    log::debug!("Deserializing response from {uri}");
+                    tracing::debug!("Deserializing response from {uri}");
                     match r.json().await {
                         Ok(v) => {
                             response = v;
                             break;
                         }
                         Err(e) => {
-                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                             tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
                 }
                 Err(e) => {
-                    log::error!(
+                    tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
@@ -516,7 +516,7 @@ impl ApiClient {
         let uri = format!("{}{entity}/{entity_id}?force=true", self.base_url());
         let mut response = serde_json::Value::Null;
         for i in 1..6 {
-            log::debug!("Connecting {uri}, try {i}");
+            tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
                 .delete(&uri)
@@ -525,21 +525,21 @@ impl ApiClient {
                 .await
             {
                 Ok(r) => {
-                    log::debug!("Deserializing response from {uri}");
+                    tracing::debug!("Deserializing response from {uri}");
                     match r.json().await {
                         Ok(v) => {
                             response = v;
                             break;
                         }
                         Err(e) => {
-                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                             tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
                 }
                 Err(e) => {
-                    log::error!(
+                    tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
@@ -592,7 +592,7 @@ impl ApiClient {
         for batch in batches {
             let mut response = serde_json::Value::Null;
             for i in 1..6 {
-                log::debug!("Connecting {uri}, try {i}");
+                tracing::debug!("Connecting {uri}, try {i}");
                 match self
                     .client
                     .post(&uri)
@@ -602,21 +602,21 @@ impl ApiClient {
                     .await
                 {
                     Ok(r) => {
-                        log::debug!("Deserializing response from {uri}");
+                        tracing::debug!("Deserializing response from {uri}");
                         match r.json().await {
                             Ok(v) => {
                                 response = v;
                                 break;
                             }
                             Err(e) => {
-                                log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                                tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                                 tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                                 continue;
                             }
                         }
                     }
                     Err(e) => {
-                        log::error!(
+                        tracing::error!(
                             "Failed to connect to {uri} with error: {e}\n{} tries left",
                             5 - i
                         );
@@ -679,7 +679,7 @@ impl ApiClient {
             );
             let mut response = serde_json::Value::Null;
             for i in 1..6 {
-                log::debug!("Connecting {uri}, try {i}");
+                tracing::debug!("Connecting {uri}, try {i}");
                 match self
                     .client
                     .get(&uri)
@@ -688,21 +688,21 @@ impl ApiClient {
                     .await
                 {
                     Ok(r) => {
-                        log::debug!("Deserializing response from {uri}");
+                        tracing::debug!("Deserializing response from {uri}");
                         match r.json().await {
                             Ok(v) => {
                                 response = v;
                                 break;
                             }
                             Err(e) => {
-                                log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                                tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                                 tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                                 continue;
                             }
                         }
                     }
                     Err(e) => {
-                        log::error!(
+                        tracing::error!(
                             "Failed to connect to {uri} with error: {e}\n{} tries left",
                             5 - i
                         );
@@ -834,7 +834,7 @@ impl ApiClient {
         };
         let mut response = serde_json::Value::Null;
         for i in 1..6 {
-            log::debug!("Connecting {uri}, try {i}");
+            tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
                 .get(&uri)
@@ -843,21 +843,21 @@ impl ApiClient {
                 .await
             {
                 Ok(r) => {
-                    log::debug!("Deserializing response from {uri}");
+                    tracing::debug!("Deserializing response from {uri}");
                     match r.json().await {
                         Ok(v) => {
                             response = v;
                             break;
                         }
                         Err(e) => {
-                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                             tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
                 }
                 Err(e) => {
-                    log::error!(
+                    tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
@@ -906,7 +906,7 @@ impl ApiClient {
         let uri = format!("{}{entity}/{entity_id}/{subentity}", self.base_url());
         let mut response = serde_json::Value::Null;
         for i in 1..6 {
-            log::debug!("Connecting {uri}, try {i}");
+            tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
                 .get(&uri)
@@ -915,21 +915,21 @@ impl ApiClient {
                 .await
             {
                 Ok(r) => {
-                    log::debug!("Deserializing response from {uri}");
+                    tracing::debug!("Deserializing response from {uri}");
                     match r.json().await {
                         Ok(v) => {
                             response = v;
                             break;
                         }
                         Err(e) => {
-                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                             tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
                 }
                 Err(e) => {
-                    log::error!(
+                    tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
@@ -986,7 +986,7 @@ impl ApiClient {
         let uri = format!("{}{entity}/{entity_id}/{subentity}", self.base_url());
         let mut response = serde_json::Value::Null;
         for i in 1..6 {
-            log::debug!("Connecting {uri}, try {i}");
+            tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
                 .post(&uri)
@@ -996,21 +996,21 @@ impl ApiClient {
                 .await
             {
                 Ok(r) => {
-                    log::debug!("Deserializing response from {uri}");
+                    tracing::debug!("Deserializing response from {uri}");
                     match r.json().await {
                         Ok(v) => {
                             response = v;
                             break;
                         }
                         Err(e) => {
-                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                             tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
                 }
                 Err(e) => {
-                    log::error!(
+                    tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
@@ -1082,7 +1082,7 @@ impl ApiClient {
         }
         let mut response = serde_json::Value::Null;
         for i in 1..6 {
-            log::debug!("Connecting {uri}, try {i}");
+            tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
                 .put(&uri)
@@ -1092,21 +1092,21 @@ impl ApiClient {
                 .await
             {
                 Ok(r) => {
-                    log::debug!("Deserializing response from {uri}");
+                    tracing::debug!("Deserializing response from {uri}");
                     match r.json().await {
                         Ok(v) => {
                             response = v;
                             break;
                         }
                         Err(e) => {
-                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                             tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
                 }
                 Err(e) => {
-                    log::error!(
+                    tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );
@@ -1161,7 +1161,7 @@ impl ApiClient {
         );
         let mut response = serde_json::Value::Null;
         for i in 1..6 {
-            log::debug!("Connecting {uri}, try {i}");
+            tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
                 .delete(&uri)
@@ -1170,21 +1170,21 @@ impl ApiClient {
                 .await
             {
                 Ok(r) => {
-                    log::debug!("Deserializing response from {uri}");
+                    tracing::debug!("Deserializing response from {uri}");
                     match r.json().await {
                         Ok(v) => {
                             response = v;
                             break;
                         }
                         Err(e) => {
-                            log::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
+                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
                             tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                             continue;
                         }
                     }
                 }
                 Err(e) => {
-                    log::error!(
+                    tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
                         5 - i
                     );

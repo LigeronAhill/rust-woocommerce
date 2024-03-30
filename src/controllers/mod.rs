@@ -44,12 +44,14 @@ pub mod webhooks;
 ///     .site_url(site_url)
 ///     .build();
 /// ```
+#[derive(Clone)]
 pub struct ApiClient {
     auth: Auth,
     base_url: String,
     client: reqwest::Client,
 }
 /// Struct representing the authentication credentials.
+#[derive(Clone)]
 pub struct Auth {
     ck: String,
     cs: String,
