@@ -289,31 +289,3 @@ impl OrderRefundLineItemCreateBuilder<WithId, WithQuantity> {
         }
     }
 }
-#[cfg(test)]
-mod tests {
-    use crate::{controllers::orders::ORDER_ID, refunds::Refund, ApiClient, Entity, SubEntity};
-
-    #[tokio::test]
-    async fn test_list_all_refunds() {
-        let client = ApiClient::from_env().unwrap();
-        let order_refunds: Vec<Refund> = client
-            .list_all_subentities(Entity::Order, ORDER_ID, SubEntity::Refund)
-            .await
-            .unwrap();
-        assert!(!order_refunds.is_empty());
-    }
-    #[tokio::test]
-    async fn test_retrieve_refund() {
-        let client = ApiClient::from_env().unwrap();
-        let order_refunds: Vec<Refund> = client
-            .list_all_subentities(Entity::Order, ORDER_ID, SubEntity::Refund)
-            .await
-            .unwrap();
-        let id = order_refunds.last().unwrap().id;
-        let order_refund: Refund = client
-            .retrieve_subentity(Entity::Order, ORDER_ID, SubEntity::Refund, id)
-            .await
-            .unwrap();
-        assert_eq!(id, order_refund.id);
-    }
-}

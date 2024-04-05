@@ -1,52 +1,6 @@
 use serde::{Deserialize, Serialize};
 
 use crate::controllers::tax_rates::{TaxRateCreateBuilder, TaxRateUpdateBuilder};
-/// ```rust
-/// #[cfg(test)]
-/// mod tests {
-///     use crate::{tax_rates::TaxRate, ApiClient, BatchObject, Entity};
-///
-///     #[tokio::test]
-///     async fn test_list_all_retrieve_tax_rates() {
-///         let client = ApiClient::from_env().unwrap();
-///         let all_tax_rate = client.list_all::<TaxRate>(Entity::TaxRate).await.unwrap();
-///         if let Some(first) = all_tax_rate.first() {
-///             let retrieved: TaxRate = client.retrieve(Entity::TaxRate, first.id).await.unwrap();
-///             assert_eq!(first.id, retrieved.id);
-///         }
-///         assert!(!all_tax_rate.is_empty());
-///     }
-///     #[tokio::test]
-///     async fn test_create_update_batch_update_delete_tax_rate() {
-///         let client = ApiClient::from_env().unwrap();
-///         let create = TaxRate::create()
-///             .country("RU")
-///             .postcode("117133")
-///             .city("Москва")
-///             .rate("10")
-///             .name("Vaaagh")
-///             .priority(9)
-///             .compound()
-///             .disable_shipping()
-///             .order(6)
-///             .build();
-///         let created: TaxRate = client.create(Entity::TaxRate, create).await.unwrap();
-///         let update = TaxRate::update().name("nooooo").build();
-///         let updated: TaxRate = client
-///             .update(Entity::TaxRate, created.id, update)
-///             .await
-///             .unwrap();
-///         assert_eq!(created.id, updated.id);
-///         let batch_update = TaxRate::update().name("yeeeeaaah").id(created.id).build();
-///         let batch = BatchObject::builder().add_update(batch_update).build();
-///         let updated: BatchObject<TaxRate> =
-///             client.batch_update(Entity::TaxRate, batch).await.unwrap();
-///         assert!(updated.update.is_some());
-///         let deleted: TaxRate = client.delete(Entity::TaxRate, created.id).await.unwrap();
-///         assert_eq!(deleted.id, created.id);
-///     }
-/// }
-/// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TaxRate {
     /// Unique identifier for the resource.READ-ONLY

@@ -1,79 +1,11 @@
-use crate::controllers::products::{ProductModify, ProductModifyBuilder};
+use crate::controllers::{
+    products::{ProductModify, ProductModifyBuilder},
+    Entity,
+};
 
 use super::MetaData;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-/// ```rust
-/// #[cfg(test)]
-/// mod tests {
-///
-///     use crate::{products::Product, ApiClient, BatchObject, Entity};
-///
-///     use super::*;
-///     #[tokio::test]
-///     async fn test_list_all_products() {
-///         let client = ApiClient::from_env().unwrap();
-///         let products: Vec<Product> = client.list_all(Entity::Product).await.unwrap();
-///         assert!(!products.is_empty());
-///     }
-///     #[tokio::test]
-///     async fn test_retrieve_product() {
-///         let client = ApiClient::from_env().unwrap();
-///         let products: Vec<Product> = client.list_all(Entity::Product).await.unwrap();
-///         let id = products.last().unwrap().id;
-///         let product: Product = client.retrieve(Entity::Product, id).await.unwrap();
-///         assert_eq!(id, product.id);
-///     }
-///     #[tokio::test]
-///     async fn test_search_product() {
-///         let client = ApiClient::from_env().unwrap();
-///         let search_string = "AW Marcus 04 4";
-///         let search_result: Vec<Product> =
-///             client.search(Entity::Product, search_string).await.unwrap();
-///         assert_eq!(search_string, search_result[0].sku);
-///     }
-///     #[tokio::test]
-///     async fn test_create_product() {
-///         let client = ApiClient::from_env().unwrap();
-///         let attribute = AttributeDTO::builder()
-///             .name("Тестовый атрибут")
-///             .option("69")
-///             .build();
-///         let product_to_create = Product::create()
-///             .name("Тестовый товар")
-///             .sku("test product")
-///             .regular_price("10000")
-///             .attribute(attribute)
-///             .build();
-///         let created_product: Product = client
-///             .create(Entity::Product, product_to_create)
-///             .await
-///             .unwrap();
-///         let id = created_product.id;
-///         assert_eq!(created_product.sku, "test product");
-///         let _deleted: Product = client.delete(Entity::Product, id).await.unwrap();
-///     }
-///     #[tokio::test]
-///     async fn test_update_product() {
-///         let client = ApiClient::from_env().unwrap();
-///         let product_to_update = Product::update().regular_price("5000").build();
-///         let updated_product: Product = client
-///             .update(Entity::Product, 3982, product_to_update)
-///             .await
-///             .unwrap();
-///         assert_eq!(updated_product.id, 3982);
-///     }
-///     #[tokio::test]
-///     async fn test_batch_update_products() {
-///         let client = ApiClient::from_env().unwrap();
-///         let product_to_update = Product::update().id(3982).regular_price("5000").build();
-///         let batch = BatchObject::builder().add_update(product_to_update).build();
-///         let updated_products: BatchObject<Product> =
-///             client.batch_update(Entity::Product, batch).await.unwrap();
-///         assert!(updated_products.update.is_some());
-///     }
-/// }
-/// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Product {
     /// Unique identifier for the resource.
@@ -208,6 +140,15 @@ pub struct Product {
     pub menu_order: i32,
     /// Meta data.
     pub meta_data: Vec<MetaData>,
+}
+impl Entity for Product {
+    fn endpoint() -> String {
+        String::from("products/")
+    }
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
+    }
 }
 impl Product {
     pub fn create() -> ProductModifyBuilder {

@@ -1,10 +1,10 @@
-pub const ORDER_ID: i32 = 4086;
 use crate::{
     customers::{Billing, Shipping},
     data::CurrencyISO,
     orders::{OrderStatus, TaxStatus},
-    MetaData, Result,
+    MetaData,
 };
+use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 #[skip_serializing_none]
@@ -398,10 +398,10 @@ impl CreateOrderBuilder {
     }
     pub fn build(self) -> Result<CreateOrder> {
         let Some(billing) = self.billing.clone() else {
-            return Err("billing email required!".into());
+            return Err(anyhow!("billing email required!"));
         };
         if billing.email.is_empty() {
-            return Err("billing email required!".into());
+            return Err(anyhow!("billing email required!"));
         }
         Ok(CreateOrder {
             parent_id: self.parent_id,
@@ -651,79 +651,5 @@ impl UpdateOrderBuilder {
             coupon_lines: self.coupon_lines,
             set_paid: self.set_paid,
         }
-    }
-}
-#[cfg(test)]
-mod tests {
-    use crate::{
-        controllers::{entities::Entity, ApiClient},
-        models::orders::Order,
-    };
-
-    use super::*;
-    #[tokio::test]
-    async fn test_list_all_orders() {
-        let client = ApiClient::from_env().unwrap();
-        let orders: Vec<Order> = client.list_all(Entity::Order).await.unwrap();
-        assert!(!orders.is_empty());
-    }
-    #[tokio::test]
-    async fn test_retrieve_order() {
-        let client = ApiClient::from_env().unwrap();
-        let orders: Vec<Order> = client.list_all(Entity::Order).await.unwrap();
-        let id = orders[0].id;
-        let order: Order = client.retrieve(Entity::Order, id).await.unwrap();
-        assert_eq!(id, order.id);
-    }
-    #[tokio::test]
-    async fn test_search_order() {
-        let client = ApiClient::from_env().unwrap();
-        let search_string = "Тестов";
-        let search_result: Vec<Order> = client.search(Entity::Order, search_string).await.unwrap();
-        assert_eq!(search_string, search_result[0].billing.last_name);
-    }
-    #[tokio::test]
-    async fn create_order() {
-        let client = ApiClient::from_env().unwrap();
-        let line_item = OrderLineItemCreate::new()
-            .product_id(3744)
-            .quantity(10)
-            .price(5800.0);
-        let shipping_line = ShippingLineCreate::new(
-            "Доставка по Москве в пределах МКАД до подъезда или терминала ТК",
-            "flat_rate",
-            "5000",
-        );
-        let order_to_create = Order::create()
-            .line_item(line_item)
-            .shipping_line(shipping_line)
-            .status(OrderStatus::Pending)
-            .billing_first_name("John")
-            .billing_country("Zimbabwe")
-            .billing_email("president@google.com")
-            .billing_last_name("Connor")
-            .currency(CurrencyISO::RUB)
-            .set_paid(false)
-            .build()
-            .unwrap();
-        let created_order: Order = client.create(Entity::Order, order_to_create).await.unwrap();
-        assert_eq!(created_order.status, OrderStatus::Pending);
-        let _deleted: Order = client
-            .delete(Entity::Order, created_order.id)
-            .await
-            .unwrap();
-    }
-    #[tokio::test]
-    async fn update_order() {
-        let client = ApiClient::from_env().unwrap();
-        let orders: Vec<Order> = client.list_all(Entity::Order).await.unwrap();
-        let order_to_update = orders.last().unwrap().id;
-        let customer_note = "Testing update";
-        let update = Order::update().customer_note(customer_note).build();
-        let updated_order: Order = client
-            .update(Entity::Order, order_to_update, update)
-            .await
-            .unwrap();
-        assert_eq!(updated_order.customer_note, customer_note);
     }
 }

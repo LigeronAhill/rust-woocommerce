@@ -1,401 +1,98 @@
-use serde::{de::DeserializeOwned, Serialize};
+use crate::{ApiClient, BatchObject};
 
-use crate::{data::Currency, ApiClient, BatchObject, Result};
+use super::Entity;
+use anyhow::{anyhow, Result};
+use serde::Serialize;
+use tokio::task::JoinSet;
+const BATCH: &str = "batch";
 
-/// Enum representing the various entities that can be retrieved using the API client.
-#[derive(Debug, Clone, PartialEq)]
-pub enum Entity {
-    Coupon,
-    Customer,
-    Order,
-    Product,
-    ProductAttribute,
-    ProductCategory,
-    ProductShippingClass,
-    ProductTag,
-    ProductReview,
-    Report,
-    ReportCouponsTotal,
-    ReportCustomersTotal,
-    ReportOrdersTotal,
-    ReportProductsTotal,
-    ReportReviewsTotal,
-    TaxRate,
-    TaxClass,
-    Webhook,
-    Setting,
-    PaymentGateway,
-    ShippingZone,
-    ShippingMethod,
-    SystemStatus,
-    SystemStatusTool,
-    Data,
-    Currency,
-    Country,
-    Continent,
-    CurrentCurrency,
-}
-impl std::fmt::Display for Entity {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Entity::Coupon => write!(f, "coupons"),
-            Entity::Customer => write!(f, "customers"),
-            Entity::Order => write!(f, "orders"),
-            Entity::Product => write!(f, "products"),
-            Entity::ProductAttribute => write!(f, "products/attributes"),
-            Entity::ProductCategory => write!(f, "products/categories"),
-            Entity::ProductShippingClass => write!(f, "products/shipping_classes"),
-            Entity::ProductTag => write!(f, "products/tags"),
-            Entity::ProductReview => write!(f, "products/reviews"),
-            Entity::Report => write!(f, "reports"),
-            Entity::TaxRate => write!(f, "taxes"),
-            Entity::TaxClass => write!(f, "taxes/classes"),
-            Entity::Webhook => write!(f, "webhooks"),
-            Entity::Setting => write!(f, "settings"),
-            Entity::PaymentGateway => write!(f, "payment_gateways"),
-            Entity::ShippingZone => write!(f, "shipping/zones"),
-            Entity::SystemStatus => write!(f, "system_status"),
-            Entity::SystemStatusTool => write!(f, "system_status/tools"),
-            Entity::Data => write!(f, "data"),
-            Entity::Currency => write!(f, "data/currencies"),
-            Entity::Country => write!(f, "data/countries"),
-            Entity::Continent => write!(f, "data/continents"),
-            Entity::CurrentCurrency => write!(f, "data/currencies/current"),
-            Entity::ReportCouponsTotal => write!(f, "reports/coupons/totals"),
-            Entity::ReportCustomersTotal => write!(f, "reports/customers/totals"),
-            Entity::ReportOrdersTotal => write!(f, "reports/orders/totals"),
-            Entity::ReportProductsTotal => write!(f, "reports/products/totals"),
-            Entity::ReportReviewsTotal => write!(f, "reports/reviews/totals"),
-            Entity::ShippingMethod => write!(f, "shipping_methods"),
-        }
-    }
-}
 impl ApiClient {
-    /// Asynchronously retrieves an entity of a specific type.
-    ///
-    /// # Arguments
-    ///
-    /// * `entity` - The type of entity to retrieve.
-    /// * `entity_id` - The ID of the entity to retrieve.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing the deserialized entity or an error if retrieval fails.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let attribute_id = 4;
-    /// let result = client
-    ///     .retrieve::<Attribute>(Entity::ProductAttribute, attribute_id)
-    ///     .await?;
-    /// ```
-    pub async fn retrieve<T>(&self, entity: Entity, entity_id: impl std::fmt::Display) -> Result<T>
-    where
-        T: DeserializeOwned,
-    {
-        let uri = format!("{}{entity}/{entity_id}", self.base_url());
-        let mut response = serde_json::Value::Null;
-        for i in 1..6 {
+    pub async fn retrieve<T: Entity>(&self, entity_id: i32) -> Result<T> {
+        let uri = self
+            .base_url
+            .join(&T::endpoint())?
+            .join(&entity_id.to_string())?;
+        for i in 1..3 {
             tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
-                .get(&uri)
+                .get(uri.clone())
                 .basic_auth(self.ck(), Some(self.cs()))
                 .send()
+                .await?
+                .json::<T>()
                 .await
             {
                 Ok(r) => {
-                    tracing::debug!("Deserializing response from {uri}");
-                    match r.json().await {
-                        Ok(v) => {
-                            response = v;
-                            break;
-                        }
-                        Err(e) => {
-                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                            continue;
-                        }
-                    }
+                    return Ok(r);
                 }
                 Err(e) => {
                     tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
-                        5 - i
+                        3 - i
                     );
-                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+                    tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
                     continue;
                 }
             }
         }
-        match serde_json::from_value::<T>(response.clone()) {
-            Ok(result) => Ok(result),
-            Err(e) => {
-                let msg = format!("Error with response to {uri} --> {e}\n{response:#?}");
-                Err(msg.into())
-            }
-        }
+        Err(anyhow!("Error retrieving entitity with id: {entity_id}"))
     }
-    /// retrieve current currency
-    pub async fn retrieve_current_currency(&self) -> Result<Currency> {
-        let uri = format!("{}data/currencies/current", self.base_url());
-        let mut response = serde_json::Value::Null;
-        for i in 1..6 {
-            tracing::debug!("Connecting {uri}, try {i}");
-            match self
-                .client
-                .get(&uri)
-                .basic_auth(self.ck(), Some(self.cs()))
-                .send()
-                .await
-            {
-                Ok(r) => {
-                    tracing::debug!("Deserializing response from {uri}");
-                    match r.json().await {
-                        Ok(v) => {
-                            response = v;
-                            break;
-                        }
-                        Err(e) => {
-                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                            continue;
-                        }
-                    }
-                }
-                Err(e) => {
-                    tracing::error!(
-                        "Failed to connect to {uri} with error: {e}\n{} tries left",
-                        5 - i
-                    );
-                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                    continue;
-                }
-            }
-        }
-        match serde_json::from_value::<Currency>(response.clone()) {
-            Ok(result) => Ok(result),
-            Err(e) => {
-                let msg = format!("Error getting current currency\n{response:#?}\n Error: {e:#?}");
-                Err(msg.into())
-            }
-        }
-    }
-    /// Asynchronously lists all entities of a specific type.
-    ///
-    /// # Arguments
-    ///
-    /// * `entity` - The type of entity to list.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing a vector of the retrieved entities or an error if retrieval fails.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let result = client
-    ///     .list_all::<Attribute>(Entity::ProductAttribute)
-    ///     .await?;
-    /// ```
-    pub async fn list_all<T>(&self, entity: Entity) -> Result<Vec<T>>
-    where
-        T: DeserializeOwned,
-    {
-        let mut result = vec![];
-        let mut page = 1;
+    pub async fn list_all<T: Entity>(&self) -> Result<Vec<T>> {
+        let uri = self.base_url.join(&T::endpoint())?;
+        let mut result = Vec::new();
+        let mut set = JoinSet::new();
+        let total_response = self
+            .client
+            .get(uri.clone())
+            .basic_auth(&self.ck(), Some(self.cs()))
+            .send()
+            .await?;
+        let total = total_response
+            .headers()
+            .get("X-WP-Total")
+            .and_then(|h| h.to_str().ok().map(|p| p.parse::<i32>().ok()))
+            .flatten()
+            .unwrap_or_default();
         let per_page = 50;
-        if entity == Entity::Data
-            || entity == Entity::Currency
-            || entity == Entity::Country
-            || entity == Entity::Continent
-            || entity == Entity::ProductAttribute
-            || entity == Entity::Report
-            || entity == Entity::ReportCouponsTotal
-            || entity == Entity::ReportCustomersTotal
-            || entity == Entity::ReportOrdersTotal
-            || entity == Entity::ReportProductsTotal
-            || entity == Entity::ReportReviewsTotal
-            || entity == Entity::TaxClass
-            || entity == Entity::Setting
-            || entity == Entity::PaymentGateway
-            || entity == Entity::ShippingZone
-            || entity == Entity::ShippingMethod
-            || entity == Entity::SystemStatus
-            || entity == Entity::SystemStatusTool
-        {
-            let uri = format!("{}{entity}", self.base_url());
-            let mut response = serde_json::Value::Null;
-            for i in 1..6 {
-                tracing::debug!("Connecting {uri}, try {i}");
-                match self
-                    .client
-                    .get(&uri)
-                    .basic_auth(self.ck(), Some(self.cs()))
+        let total_pages = total / per_page + 1;
+        for page in 1..=total_pages {
+            let client = self.client();
+            let ck = self.ck();
+            let cs = Some(self.cs());
+            let url = uri.clone();
+            set.spawn(async move {
+                client
+                    .get(url)
+                    .query(&[("page", page), ("per_page", per_page)])
+                    .basic_auth(ck, cs)
                     .send()
+                    .await?
+                    .json::<Vec<T>>()
                     .await
-                {
-                    Ok(r) => {
-                        tracing::debug!("Deserializing response from {uri}");
-                        match r.json().await {
-                            Ok(v) => {
-                                response = v;
-                                break;
-                            }
-                            Err(e) => {
-                                tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                                tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                                continue;
-                            }
-                        }
-                    }
-                    Err(e) => {
-                        tracing::error!(
-                            "Failed to connect to {uri} with error: {e}\n{} tries left",
-                            5 - i
-                        );
-                        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                        continue;
-                    }
-                }
-            }
-            if entity != Entity::SystemStatus {
-                match serde_json::from_value::<Vec<T>>(response.clone()) {
-                    Ok(result) => {
-                        return Ok(result);
-                    }
-                    Err(e) => {
-                        let msg = format!("Error getting {uri}\n\n{response:#?}\n\n{e}");
-                        return Err(msg.into());
-                    }
-                }
-            } else {
-                match serde_json::from_value::<T>(response.clone()) {
-                    Ok(result) => {
-                        return Ok(vec![result]);
-                    }
-                    Err(e) => {
-                        let msg = format!("Error getting {uri}\n\n{response:#?}\n\n{e}");
-                        return Err(msg.into());
-                    }
-                }
-            }
-        } else {
-            loop {
-                let uri = format!(
-                    "{}{entity}?page={page}&per_page={per_page}",
-                    self.base_url()
-                );
-                let mut response = serde_json::Value::Null;
-                for i in 1..6 {
-                    tracing::debug!("Connecting {uri}, try {i}");
-                    match self
-                        .client
-                        .get(&uri)
-                        .basic_auth(self.ck(), Some(self.cs()))
-                        .send()
-                        .await
-                    {
-                        Ok(r) => {
-                            tracing::debug!("Deserializing response from {uri}");
-                            match r.json().await {
-                                Ok(v) => {
-                                    response = v;
-                                    break;
-                                }
-                                Err(e) => {
-                                    tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                                    tokio::time::sleep(tokio::time::Duration::from_millis(500))
-                                        .await;
-                                    continue;
-                                }
-                            }
-                        }
-                        Err(e) => {
-                            tracing::error!(
-                                "Failed to connect to {uri} with error: {e}\n{} tries left",
-                                5 - i
-                            );
-                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                            continue;
-                        }
-                    }
-                }
-                match serde_json::from_value::<Vec<T>>(response.clone()) {
-                    Ok(chunk_result) => {
-                        if chunk_result.is_empty() {
-                            break;
-                        }
-                        result.extend(chunk_result);
-                        page += 1;
-                    }
-                    Err(e) => {
-                        let msg = format!("Error getting {uri}\n{response:#?}\nError: {e:#?}");
-                        return Err(msg.into());
-                    }
-                }
-            }
+            });
+        }
+        while let Some(Ok(Ok(v))) = set.join_next().await {
+            result.extend(v)
         }
         Ok(result)
     }
-    /// Asynchronously creates entity of a specific type.
-    ///
-    /// # Arguments
-    ///
-    /// * `entity` - The type of entity to list.
-    /// * `object` - The serialized object containing the updated data for the entity.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing the created entity or an error if the create fails.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let attribute = AttributeDTO::builder()
-    ///     .name("test attribute")
-    ///     .option("69")
-    ///     .build();
-    /// let product_to_create = Product::create()
-    ///     .name("Test product")
-    ///     .sku("test product")
-    ///     .regular_price("10000")
-    ///     .attribute(attribute)
-    ///     .build();
-    /// let created_product: Product = client
-    ///     .create(Entity::Product, product_to_create)
-    ///     .await?;
-    /// ```
-    pub async fn create<T>(&self, entity: Entity, object: impl Serialize) -> Result<T>
-    where
-        T: DeserializeOwned,
-    {
-        let uri = format!("{}{entity}", self.base_url());
-        let mut response = serde_json::Value::Null;
-        for i in 1..6 {
+    pub async fn create<T: Entity>(&self, object: impl Serialize) -> Result<T> {
+        let uri = self.base_url.join(&T::endpoint())?;
+        for i in 1..3 {
             tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
-                .post(&uri)
+                .post(uri.clone())
                 .basic_auth(self.ck(), Some(self.cs()))
                 .json(&object)
                 .send()
+                .await?
+                .json::<T>()
                 .await
             {
                 Ok(r) => {
-                    tracing::debug!("Deserializing response from {uri}");
-                    match r.json().await {
-                        Ok(v) => {
-                            response = v;
-                            break;
-                        }
-                        Err(e) => {
-                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                            continue;
-                        }
-                    }
+                    return Ok(r);
                 }
                 Err(e) => {
                     tracing::error!(
@@ -407,798 +104,443 @@ impl ApiClient {
                 }
             }
         }
-        match serde_json::from_value::<T>(response.clone()) {
-            Ok(result) => Ok(result),
-            Err(e) => {
-                let msg = format!("Error getting {uri} --> {e}\n{response:#?}");
-                Err(msg.into())
-            }
-        }
+        Err(anyhow!("Error retrieving entitities"))
     }
-    /// Asynchronously updates an entity of a specific type.
-    ///
-    /// # Arguments
-    ///
-    /// * `entity` - The type of entity to update.
-    /// * `entity_id` - The ID of the entity to update.
-    /// * `object` - The serialized object containing the updated data for the entity.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing the updated entity or an error if the update fails.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let product_id = 69;
-    /// let product_to_update = Product::update().regular_price("5000").build();
-    /// let updated_product: Product = client
-    ///     .update(Entity::Product, product_id, product_to_update)
-    ///     .await?;
-    /// ```
-    pub async fn update<T>(
-        &self,
-        entity: Entity,
-        entity_id: impl std::fmt::Display,
-        object: impl Serialize,
-    ) -> Result<T>
-    where
-        T: DeserializeOwned,
-    {
-        let uri = format!("{}{entity}/{entity_id}", self.base_url());
-        if entity == Entity::TaxClass {
-            return Err("method not allowed".into());
-        }
-        let mut response = serde_json::Value::Null;
-        for i in 1..6 {
+    pub async fn update<T: Entity>(&self, entity_id: i32, object: impl Serialize) -> Result<T> {
+        let uri = self
+            .base_url
+            .join(&T::endpoint())?
+            .join(&entity_id.to_string())?;
+        for i in 1..3 {
             tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
-                .put(&uri)
+                .put(uri.clone())
                 .basic_auth(self.ck(), Some(self.cs()))
                 .json(&object)
                 .send()
+                .await?
+                .json::<T>()
                 .await
             {
-                Ok(r) => {
-                    tracing::debug!("Deserializing response from {uri}");
-                    match r.json().await {
-                        Ok(v) => {
-                            response = v;
-                            break;
-                        }
-                        Err(e) => {
-                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                            continue;
-                        }
-                    }
-                }
+                Ok(r) => return Ok(r),
                 Err(e) => {
                     tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
-                        5 - i
+                        3 - i
                     );
                     tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
         }
-        match serde_json::from_value::<T>(response.clone()) {
-            Ok(result) => Ok(result),
-            Err(_) => {
-                let msg = format!("{response:#?}");
-                Err(msg.into())
-            }
-        }
+        Err(anyhow!("Error updating entitity with id: {entity_id}"))
     }
-    /// Asynchronously deletes an entity of a specific type.
-    ///
-    /// # Arguments
-    ///
-    /// * `entity` - The type of entity to delete.
-    /// * `entity_id` - The ID of the entity to delete.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing the deleted entity or an error if the deletion fails.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let id = 69;
-    /// let deleted: Product = client.delete(Entity::Product, id).await?;
-    /// ```
-    pub async fn delete<T>(&self, entity: Entity, entity_id: impl std::fmt::Display) -> Result<T>
-    where
-        T: DeserializeOwned,
-    {
-        let uri = format!("{}{entity}/{entity_id}?force=true", self.base_url());
-        let mut response = serde_json::Value::Null;
-        for i in 1..6 {
+    pub async fn delete<T: Entity>(&self, entity_id: i32) -> Result<T> {
+        let uri = self
+            .base_url
+            .join(&T::endpoint())?
+            .join(&entity_id.to_string())?;
+        for i in 1..3 {
             tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
-                .delete(&uri)
+                .delete(uri.clone())
                 .basic_auth(self.ck(), Some(self.cs()))
                 .send()
+                .await?
+                .json::<T>()
                 .await
             {
                 Ok(r) => {
-                    tracing::debug!("Deserializing response from {uri}");
-                    match r.json().await {
-                        Ok(v) => {
-                            response = v;
-                            break;
-                        }
-                        Err(e) => {
-                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                            continue;
-                        }
-                    }
+                    return Ok(r);
                 }
                 Err(e) => {
                     tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
-                        5 - i
+                        3 - i
                     );
                     tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
         }
-        match serde_json::from_value::<T>(response.clone()) {
-            Ok(result) => Ok(result),
-            Err(_) => {
-                let msg = format!("{response:#?}");
-                Err(msg.into())
-            }
-        }
+        Err(anyhow!("Error deleting entitity with id: {entity_id}"))
     }
-    /// Asynchronously updates a batch of entities for a specific type.
-    ///
-    /// # Arguments
-    ///
-    /// * `entity` - The type of entity to update.
-    /// * `batch_object` - The batch object containing the entities to update.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing the modified batch object or an error if the update fails.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let product_id = 69;
-    /// let product_to_update = Product::update().id(product_id).regular_price("5000").build();
-    /// let batch = BatchObject::builder().add_update(product_to_update).build();
-    /// let updated_products: BatchObject<Product> =
-    ///     client.batch_update(Entity::Product, batch).await?;
-    /// ```
-    pub async fn batch_update<T, O>(
+    pub async fn search<T: Entity, S: ToString>(&self, _search_string: S) -> Result<Vec<T>> {
+        let result = vec![];
+        Ok(result)
+    }
+    pub async fn batch_create<T: Entity, O: Serialize + Clone + Send + 'static>(
         &self,
-        entity: Entity,
-        batch_object: BatchObject<O>,
-    ) -> Result<BatchObject<T>>
-    where
-        T: DeserializeOwned + Serialize + Clone,
-        O: DeserializeOwned + Serialize + Clone,
-    {
-        let uri = format!("{}{entity}/batch", self.base_url());
-        // By default it's limited to up to 100 objects to be created, updated or deleted.
-        let batches = create_batches(&batch_object);
-        let mut modified = BatchObject::builder();
-        for batch in batches {
-            let mut response = serde_json::Value::Null;
-            for i in 1..6 {
-                tracing::debug!("Connecting {uri}, try {i}");
-                match self
-                    .client
-                    .post(&uri)
-                    .basic_auth(self.ck(), Some(self.cs()))
+        create_objects: Vec<O>,
+    ) -> Result<Vec<T>> {
+        let mut result = Vec::new();
+        let mut set = JoinSet::new();
+        let uri = self.base_url.join(&T::endpoint())?.join(BATCH)?;
+        let batched = create_objects
+            .chunks(100)
+            .map(|c| BatchObject::builder().extend_create(c.to_vec()).build())
+            .collect::<Vec<_>>();
+        for batch in batched {
+            let client = self.client();
+            let ck = self.ck();
+            let cs = Some(self.cs());
+            let url = uri.clone();
+            set.spawn(async move {
+                client
+                    .post(url)
+                    .basic_auth(ck, cs)
                     .json(&batch)
                     .send()
+                    .await?
+                    .json::<BatchObject<T>>()
                     .await
-                {
-                    Ok(r) => {
-                        tracing::debug!("Deserializing response from {uri}");
-                        match r.json().await {
-                            Ok(v) => {
-                                response = v;
-                                break;
-                            }
-                            Err(e) => {
-                                tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                                tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                                continue;
-                            }
-                        }
-                    }
-                    Err(e) => {
-                        tracing::error!(
-                            "Failed to connect to {uri} with error: {e}\n{} tries left",
-                            5 - i
-                        );
-                        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                        continue;
-                    }
-                }
-            }
-            match serde_json::from_value::<BatchObject<T>>(response.clone()) {
-                Ok(result) => {
-                    if let Some(create) = result.create {
-                        modified.extend_create(create);
-                    }
-                    if let Some(update) = result.update {
-                        modified.extend_update(update);
-                    }
-                }
-                Err(_) => {
-                    let msg = format!("{response:#?}");
-                    return Err(msg.into());
-                }
-            }
+            });
         }
-        Ok(modified.build())
+        while let Some(Ok(Ok(v))) = set.join_next().await {
+            result.extend(v.create)
+        }
+        Ok(result.into_iter().flatten().collect::<Vec<_>>())
     }
-    /// Asynchronously searches for entities of a specific type based on a provided search string.
-    ///
-    /// # Arguments
-    ///
-    /// * `entity` - The type of entity to search.
-    /// * `search_string` - The search string used to filter entities.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing a vector of entities matching the search criteria or an error if the search fails.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let search_string = "string to search";
-    /// let search_result: Vec<Product> =
-    ///     client.search(Entity::Product, search_string).await?;
-    /// ```
-    pub async fn search<T>(
+    pub async fn batch_update<T: Entity, O: Serialize + Clone + Send + 'static>(
         &self,
-        entity: Entity,
-        search_string: impl Into<String>,
-    ) -> Result<Vec<T>>
-    where
-        T: DeserializeOwned,
-    {
-        let mut result = vec![];
-        let mut page = 1;
-        let per_page = 50;
-        let search = search_string.into();
-        loop {
-            let uri = format!(
-                "{}{entity}?page={page}&per_page={per_page}&search={search}",
-                self.base_url(),
-            );
-            let mut response = serde_json::Value::Null;
-            for i in 1..6 {
-                tracing::debug!("Connecting {uri}, try {i}");
-                match self
-                    .client
-                    .get(&uri)
-                    .basic_auth(self.ck(), Some(self.cs()))
+        update_objects: Vec<O>,
+    ) -> Result<Vec<T>> {
+        let mut result = Vec::new();
+        let mut set = JoinSet::new();
+        let uri = self.base_url.join(&T::endpoint())?.join(BATCH)?;
+        let batched = update_objects
+            .chunks(100)
+            .map(|c| BatchObject::builder().extend_update(c.to_vec()).build())
+            .collect::<Vec<_>>();
+        for batch in batched {
+            let client = self.client();
+            let ck = self.ck();
+            let cs = Some(self.cs());
+            let url = uri.clone();
+            set.spawn(async move {
+                client
+                    .post(url)
+                    .basic_auth(ck, cs)
+                    .json(&batch)
                     .send()
+                    .await?
+                    .json::<BatchObject<T>>()
                     .await
-                {
-                    Ok(r) => {
-                        tracing::debug!("Deserializing response from {uri}");
-                        match r.json().await {
-                            Ok(v) => {
-                                response = v;
-                                break;
-                            }
-                            Err(e) => {
-                                tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                                tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                                continue;
-                            }
-                        }
-                    }
-                    Err(e) => {
-                        tracing::error!(
-                            "Failed to connect to {uri} with error: {e}\n{} tries left",
-                            5 - i
-                        );
-                        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                        continue;
-                    }
-                }
-            }
-            match serde_json::from_value::<Vec<T>>(response.clone()) {
-                Ok(chunk_result) => {
-                    if chunk_result.is_empty() {
-                        break;
-                    }
-                    result.extend(chunk_result);
-                    page += 1;
-                }
-                Err(e) => {
-                    let msg = format!("Error getting {uri} - {e}\n{response:#?}");
-                    return Err(msg.into());
-                }
-            }
+            });
         }
-        Ok(result)
+        while let Some(Ok(Ok(v))) = set.join_next().await {
+            result.extend(v.update)
+        }
+        Ok(result.into_iter().flatten().collect::<Vec<_>>())
     }
-}
-fn create_batches<T>(input_batch: &BatchObject<T>) -> Vec<BatchObject<T>>
-where
-    T: serde::Serialize + Clone,
-{
-    let mut result_batches = Vec::new();
-    let create_pages = {
-        if let Some(create) = input_batch.create.to_owned() {
-            create
-                .chunks(50)
-                .map(|slice| slice.to_vec())
-                .collect::<Vec<Vec<T>>>()
-        } else {
-            vec![]
-        }
-    };
-    let update_pages = {
-        if let Some(update) = input_batch.update.to_owned() {
-            update
-                .chunks(50)
-                .map(|slice| slice.to_vec())
-                .collect::<Vec<Vec<T>>>()
-        } else {
-            vec![]
-        }
-    };
-    let max_length = std::cmp::max(create_pages.len(), update_pages.len());
-    for i in 0..max_length {
-        let mut b = BatchObject::builder();
-        if let Some(create) = create_pages.get(i) {
-            b.extend_create(create.clone());
-        }
-        if let Some(update) = update_pages.get(i) {
-            b.extend_update(update.clone());
-        }
-        let batch = b.build();
-        result_batches.push(batch);
-    }
-    result_batches
-}
-/// Enum representing various sub-entities that can be associated with the main entities.
-#[derive(Debug, Clone, PartialEq)]
-pub enum SubEntity {
-    OrderNote,
-    Refund,
-    ProductVariation,
-    AttributeTerm,
-    SettingOption,
-    ShippingZoneLocation,
-    ShippingZoneMethod,
-}
-impl std::fmt::Display for SubEntity {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SubEntity::OrderNote => write!(f, "notes"),
-            SubEntity::Refund => write!(f, "refunds"),
-            SubEntity::ProductVariation => write!(f, "variations"),
-            SubEntity::AttributeTerm => write!(f, "terms"),
-            SubEntity::SettingOption => write!(f, "setting_option"),
-            SubEntity::ShippingZoneLocation => write!(f, "locations"),
-            SubEntity::ShippingZoneMethod => write!(f, "methods"),
-        }
-    }
-}
-impl ApiClient {
-    /// Asynchronously retrieves a specific subentity of a given entity.
-    ///
-    /// # Arguments
-    ///
-    /// * `entity` - The type of the main entity.
-    /// * `entity_id` - The ID of the main entity.
-    /// * `subentity` - The subentity to retrieve.
-    /// * `subentity_id` - The ID of the subentity to retrieve.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing the deserialized subentity or an error if retrieval fails.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let product_id = 69;
-    /// let variation_id = 42;
-    /// let result: ProductVariation = client
-    ///     .retrieve_subentity(Entity::Product, product_id, SubEntity::ProductVariation, variation_id)
-    ///     .await?;
-    /// ```
-    pub async fn retrieve_subentity<T>(
+    pub async fn batch_delete<T: Entity, O: Serialize + Clone + Send + 'static>(
         &self,
-        entity: Entity,
-        entity_id: impl std::fmt::Display,
-        subentity: SubEntity,
-        subentity_id: impl std::fmt::Display,
-    ) -> Result<T>
-    where
-        T: DeserializeOwned,
-    {
-        let uri = if subentity != SubEntity::SettingOption {
-            format!(
-                "{}{entity}/{entity_id}/{subentity}/{subentity_id}",
-                self.base_url()
-            )
-        } else {
-            format!("{}settings/{entity_id}/{subentity_id}", self.base_url())
-        };
-        let mut response = serde_json::Value::Null;
-        for i in 1..6 {
+        delete_objects: Vec<O>,
+    ) -> Result<Vec<T>> {
+        let mut result = Vec::new();
+        let mut set = JoinSet::new();
+        let uri = self.base_url.join(&T::endpoint())?.join(BATCH)?;
+        let batched = delete_objects
+            .chunks(100)
+            .map(|c| BatchObject::builder().extend_delete(c.to_vec()).build())
+            .collect::<Vec<_>>();
+        for batch in batched {
+            let client = self.client();
+            let ck = self.ck();
+            let cs = Some(self.cs());
+            let url = uri.clone();
+            set.spawn(async move {
+                client
+                    .post(url)
+                    .basic_auth(ck, cs)
+                    .json(&batch)
+                    .send()
+                    .await?
+                    .json::<BatchObject<T>>()
+                    .await
+            });
+        }
+        while let Some(Ok(Ok(v))) = set.join_next().await {
+            result.extend(v.delete)
+        }
+        Ok(result.into_iter().flatten().collect::<Vec<_>>())
+    }
+    pub async fn retrieve_subentity<T: Entity>(
+        &self,
+        entity_id: i32,
+        subentity_id: i32,
+    ) -> Result<T> {
+        let uri = self
+            .base_url
+            .join(&T::child_endpoint(entity_id))?
+            .join(&subentity_id.to_string())?;
+        for i in 1..3 {
             tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
-                .get(&uri)
+                .get(uri.clone())
                 .basic_auth(self.ck(), Some(self.cs()))
                 .send()
+                .await?
+                .json::<T>()
                 .await
             {
-                Ok(r) => {
-                    tracing::debug!("Deserializing response from {uri}");
-                    match r.json().await {
-                        Ok(v) => {
-                            response = v;
-                            break;
-                        }
-                        Err(e) => {
-                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                            continue;
-                        }
-                    }
-                }
+                Ok(r) => return Ok(r),
                 Err(e) => {
                     tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
-                        5 - i
+                        3 - i
                     );
                     tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
         }
-        match serde_json::from_value::<T>(response.clone()) {
-            Ok(result) => Ok(result),
-            Err(e) => {
-                let msg = format!("Error with response to {uri} --> {e}\n{response:#?}");
-                Err(msg.into())
-            }
-        }
+        Err(anyhow!(
+            "Error retrieving subentitity with id: {subentity_id}"
+        ))
     }
-    /// Asynchronously lists all subentities of a specific entity.
-    ///
-    /// # Arguments
-    ///
-    /// * `entity` - The type of the main entity.
-    /// * `entity_id` - The ID of the main entity.
-    /// * `subentity` - The type of subentity to list.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing a vector of the retrieved subentities or an error if retrieval fails.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let product_id = 69;
-    /// let result: Vec<ProductVariation> = client
-    ///     .list_all_subentities(Entity::Product, product_id, SubEntity::ProductVariation)
-    ///     .await?;
-    /// ```
-    pub async fn list_all_subentities<T>(
-        &self,
-        entity: Entity,
-        entity_id: impl std::fmt::Display,
-        subentity: SubEntity,
-    ) -> Result<Vec<T>>
-    where
-        T: DeserializeOwned,
-    {
-        let uri = format!("{}{entity}/{entity_id}/{subentity}", self.base_url());
-        let mut response = serde_json::Value::Null;
-        for i in 1..6 {
+    pub async fn list_all_subentities<T: Entity>(&self, entity_id: i32) -> Result<Vec<T>> {
+        let uri = self.base_url.join(&T::child_endpoint(entity_id))?;
+        for i in 1..3 {
             tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
-                .get(&uri)
+                .get(uri.clone())
                 .basic_auth(self.ck(), Some(self.cs()))
                 .send()
+                .await?
+                .json::<Vec<T>>()
                 .await
             {
-                Ok(r) => {
-                    tracing::debug!("Deserializing response from {uri}");
-                    match r.json().await {
-                        Ok(v) => {
-                            response = v;
-                            break;
-                        }
-                        Err(e) => {
-                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                            continue;
-                        }
-                    }
-                }
+                Ok(r) => return Ok(r),
                 Err(e) => {
                     tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
-                        5 - i
+                        3 - i
                     );
                     tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
         }
-        match serde_json::from_value::<Vec<T>>(response.clone()) {
-            Ok(result) => Ok(result),
-            Err(e) => {
-                let msg = format!("Error getting {uri}\n\n{response:#?}\n\n{e}");
-                Err(msg.into())
-            }
-        }
+        Err(anyhow!(
+            "Error retrieving subentitity for entity with id: {entity_id}"
+        ))
     }
-    /// Asynchronously reates a specific subentity of a given entity.
-    ///
-    /// # Arguments
-    ///
-    /// * `entity` - The type of the main entity.
-    /// * `entity_id` - The ID of the main entity.
-    /// * `subentity` - The type of the subentity to update.
-    /// * `object` - The serialized object containing the data to create for the subentity.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing the created subentity or an error if the update fails.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let product_id = 69;
-    /// let variation_to_create = ProductVariation::create().sku("test-sku").build();
-    /// let created: ProductVariation = client
-    ///     .create_subentity(
-    ///         Entity::Product,
-    ///         product_id,
-    ///         SubEntity::ProductVariation,
-    ///         variation_to_create,
-    ///     )
-    ///     .await?;
-    /// ```
-    pub async fn create_subentity<T>(
+    pub async fn create_subentity<T: Entity>(
         &self,
-        entity: Entity,
-        entity_id: impl std::fmt::Display,
-        subentity: SubEntity,
+        entity_id: i32,
         object: impl Serialize,
-    ) -> Result<T>
-    where
-        T: DeserializeOwned,
-    {
-        let uri = format!("{}{entity}/{entity_id}/{subentity}", self.base_url());
-        let mut response = serde_json::Value::Null;
-        for i in 1..6 {
+    ) -> Result<T> {
+        let uri = self.base_url.join(&T::child_endpoint(entity_id))?;
+        for i in 1..3 {
             tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
-                .post(&uri)
+                .post(uri.clone())
                 .basic_auth(self.ck(), Some(self.cs()))
                 .json(&object)
                 .send()
+                .await?
+                .json::<T>()
                 .await
             {
                 Ok(r) => {
-                    tracing::debug!("Deserializing response from {uri}");
-                    match r.json().await {
-                        Ok(v) => {
-                            response = v;
-                            break;
-                        }
-                        Err(e) => {
-                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                            continue;
-                        }
-                    }
+                    return Ok(r);
                 }
                 Err(e) => {
                     tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
-                        5 - i
+                        3 - i
                     );
                     tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
         }
-        match serde_json::from_value::<T>(response.clone()) {
-            Ok(result) => Ok(result),
-            Err(e) => {
-                let msg = format!("Error getting {uri} --> {e}\n{response:#?}");
-                Err(msg.into())
-            }
-        }
+        Err(anyhow!("Error creating subentitity for id: {entity_id}"))
     }
-    /// Asynchronously updates a specific subentity of a given entity.
-    ///
-    /// # Arguments
-    ///
-    /// * `entity` - The type of the main entity.
-    /// * `entity_id` - The ID of the main entity.
-    /// * `subentity` - The type of the subentity to update.
-    /// * `subentity_id` - The ID of the subentity to update.
-    /// * `object` - The serialized object containing the updated data for the subentity.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing the updated subentity or an error if the update fails.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let product_id = 69;
-    /// let variation_id = 69;
-    /// let update = ProductVariation::update().regular_price("4000").build();
-    /// let updated: ProductVariation = client
-    ///     .update_subentity(
-    ///         Entity::Product,
-    ///         product_id,
-    ///         SubEntity::ProductVariation,
-    ///         variation_id,
-    ///         update,
-    ///     )
-    ///     .await?;
-    /// ```
-    pub async fn update_subentity<T>(
+    pub async fn update_subentity<T: Entity>(
         &self,
-        entity: Entity,
-        entity_id: impl std::fmt::Display,
-        subentity: SubEntity,
-        subentity_id: impl std::fmt::Display,
+        entity_id: i32,
+        subentity_id: i32,
         object: impl Serialize,
-    ) -> Result<T>
-    where
-        T: DeserializeOwned,
-    {
-        let uri = if subentity != SubEntity::SettingOption {
-            format!(
-                "{}{entity}/{entity_id}/{subentity}/{subentity_id}",
-                self.base_url()
-            )
-        } else {
-            format!("{}{entity}/{entity_id}/{subentity_id}", self.base_url())
-        };
-        if subentity == SubEntity::OrderNote || subentity == SubEntity::Refund {
-            let msg = format!("No such method for {subentity}");
-            return Err(msg.into());
-        }
-        let mut response = serde_json::Value::Null;
-        for i in 1..6 {
+    ) -> Result<T> {
+        let uri = self
+            .base_url
+            .join(&T::child_endpoint(entity_id))?
+            .join(&subentity_id.to_string())?;
+        for i in 1..3 {
             tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
-                .put(&uri)
+                .put(uri.clone())
                 .basic_auth(self.ck(), Some(self.cs()))
                 .json(&object)
                 .send()
+                .await?
+                .json::<T>()
                 .await
             {
-                Ok(r) => {
-                    tracing::debug!("Deserializing response from {uri}");
-                    match r.json().await {
-                        Ok(v) => {
-                            response = v;
-                            break;
-                        }
-                        Err(e) => {
-                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                            continue;
-                        }
-                    }
-                }
+                Ok(r) => return Ok(r),
                 Err(e) => {
                     tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
-                        5 - i
+                        3 - i
                     );
                     tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
         }
-        match serde_json::from_value::<T>(response.clone()) {
-            Ok(result) => Ok(result),
-            Err(e) => {
-                let msg = format!("Error getting {uri} - {e}\n{response:#?}");
-                Err(msg.into())
-            }
-        }
+        Err(anyhow!(
+            "Error updating subentitity with id: {subentity_id}"
+        ))
     }
-    /// Asynchronously deletes a specific subentity of a given entity.
-    ///
-    /// # Arguments
-    ///
-    /// * `entity` - The type of the main entity.
-    /// * `entity_id` - The ID of the main entity.
-    /// * `subentity` - The type of the subentity to delete.
-    /// * `subentity_id` - The ID of the subentity to delete.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing the status of the deletion operation or an error if the deletion fails.    
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let product_id = 69;
-    /// let variation_id = 69;
-    /// let deleted: ProductVariation = client
-    ///     .delete_subentity(Entity::Product, product_id, SubEntity::ProductVariation, variation_id)
-    ///     .await?;
-    /// ```
-    pub async fn delete_subentity<T>(
+    pub async fn delete_subentity<T: Entity>(
         &self,
-        entity: Entity,
-        entity_id: impl std::fmt::Display,
-        subentity: SubEntity,
-        subentity_id: impl std::fmt::Display,
-    ) -> Result<T>
-    where
-        T: DeserializeOwned,
-    {
-        let uri = format!(
-            "{}{entity}/{entity_id}/{subentity}/{subentity_id}?force=true",
-            self.base_url()
-        );
-        let mut response = serde_json::Value::Null;
-        for i in 1..6 {
+        entity_id: i32,
+        subentity_id: i32,
+    ) -> Result<T> {
+        let uri = self
+            .base_url
+            .join(&T::child_endpoint(entity_id))?
+            .join(&subentity_id.to_string())?;
+        for i in 1..3 {
             tracing::debug!("Connecting {uri}, try {i}");
             match self
                 .client
-                .delete(&uri)
+                .delete(uri.clone())
                 .basic_auth(self.ck(), Some(self.cs()))
                 .send()
+                .await?
+                .json::<T>()
                 .await
             {
-                Ok(r) => {
-                    tracing::debug!("Deserializing response from {uri}");
-                    match r.json().await {
-                        Ok(v) => {
-                            response = v;
-                            break;
-                        }
-                        Err(e) => {
-                            tracing::error!("Failed to deserialize response from {uri} with error: {e}\n{} tries left", 5-i);
-                            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-                            continue;
-                        }
-                    }
-                }
+                Ok(r) => return Ok(r),
                 Err(e) => {
                     tracing::error!(
                         "Failed to connect to {uri} with error: {e}\n{} tries left",
-                        5 - i
+                        3 - i
                     );
                     tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }
         }
-        match serde_json::from_value::<T>(response.clone()) {
-            Ok(result) => Ok(result),
-            Err(e) => {
-                let msg = format!("Error getting {uri} - {e}\n{response:#?}");
-                Err(msg.into())
-            }
+        Err(anyhow!(
+            "Error deleting subentitity with id: {subentity_id}"
+        ))
+    }
+    pub async fn batch_create_subentity<T: Entity, O: Serialize + Clone + Send + 'static>(
+        &self,
+        entity_id: i32,
+        create_objects: Vec<O>,
+    ) -> Result<Vec<T>> {
+        let mut result = Vec::new();
+        let mut set = JoinSet::new();
+        let uri = self
+            .base_url
+            .join(&T::child_endpoint(entity_id))?
+            .join(BATCH)?;
+        let batched = create_objects
+            .chunks(100)
+            .map(|c| BatchObject::builder().extend_create(c.to_vec()).build())
+            .collect::<Vec<_>>();
+        for batch in batched {
+            let client = self.client();
+            let ck = self.ck();
+            let cs = Some(self.cs());
+            let url = uri.clone();
+            set.spawn(async move {
+                client
+                    .post(url)
+                    .basic_auth(ck, cs)
+                    .json(&batch)
+                    .send()
+                    .await?
+                    .json::<BatchObject<T>>()
+                    .await
+            });
         }
+        while let Some(Ok(Ok(v))) = set.join_next().await {
+            result.extend(v.create)
+        }
+        Ok(result.into_iter().flatten().collect::<Vec<_>>())
+    }
+    pub async fn batch_update_subentity<T: Entity, O: Serialize + Clone + Send + 'static>(
+        &self,
+        entity_id: i32,
+        update_objects: Vec<O>,
+    ) -> Result<Vec<T>> {
+        let mut result = Vec::new();
+        let mut set = JoinSet::new();
+        let uri = self
+            .base_url
+            .join(&T::child_endpoint(entity_id))?
+            .join(BATCH)?;
+        let batched = update_objects
+            .chunks(100)
+            .map(|c| BatchObject::builder().extend_update(c.to_vec()).build())
+            .collect::<Vec<_>>();
+        for batch in batched {
+            let client = self.client();
+            let ck = self.ck();
+            let cs = Some(self.cs());
+            let url = uri.clone();
+            set.spawn(async move {
+                client
+                    .post(url)
+                    .basic_auth(ck, cs)
+                    .json(&batch)
+                    .send()
+                    .await?
+                    .json::<BatchObject<T>>()
+                    .await
+            });
+        }
+        while let Some(Ok(Ok(v))) = set.join_next().await {
+            result.extend(v.update)
+        }
+        Ok(result.into_iter().flatten().collect::<Vec<_>>())
+    }
+    pub async fn batch_delete_subentity<T: Entity, O: Serialize + Clone + Send + 'static>(
+        &self,
+        entity_id: i32,
+        delete_objects: Vec<O>,
+    ) -> Result<Vec<T>> {
+        let mut result = Vec::new();
+        let mut set = JoinSet::new();
+        let uri = self
+            .base_url
+            .join(&T::child_endpoint(entity_id))?
+            .join(BATCH)?;
+        let batched = delete_objects
+            .chunks(100)
+            .map(|c| BatchObject::builder().extend_delete(c.to_vec()).build())
+            .collect::<Vec<_>>();
+        for batch in batched {
+            let client = self.client();
+            let ck = self.ck();
+            let cs = Some(self.cs());
+            let url = uri.clone();
+            set.spawn(async move {
+                client
+                    .post(url)
+                    .basic_auth(ck, cs)
+                    .json(&batch)
+                    .send()
+                    .await?
+                    .json::<BatchObject<T>>()
+                    .await
+            });
+        }
+        while let Some(Ok(Ok(v))) = set.join_next().await {
+            result.extend(v.delete)
+        }
+        Ok(result.into_iter().flatten().collect::<Vec<_>>())
     }
 }

@@ -1,12 +1,9 @@
-use rust_woocommerce::{
-    controllers::products::AttributeDTO, products::Product, ApiClient, BatchObject, Result,
-};
+use anyhow::Result;
+use rust_woocommerce::{controllers::products::AttributeDTO, products::Product, ApiClient};
 #[tokio::main]
 async fn main() -> Result<()> {
     let client = ApiClient::from_env()?;
-    let medusa = client
-        .retrieve::<Product>(rust_woocommerce::Entity::Product, 1307)
-        .await?;
+    let medusa = client.retrieve::<Product>(1307).await?;
     let base_uri = "https://carpetyourlife.com";
     let search = "medusa";
     let search_results_re =
@@ -107,9 +104,7 @@ async fn main() -> Result<()> {
                 product_to_create.attribute(at);
             }
             let product_to_create = product_to_create.build();
-            let _created: Product = client
-                .create(rust_woocommerce::Entity::Product, product_to_create)
-                .await?;
+            let _created: Product = client.create(product_to_create).await?;
             created_prdcts += 1;
         }
     }

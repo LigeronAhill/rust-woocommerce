@@ -39,6 +39,7 @@ pub struct MetaData {
 pub struct BatchObject<O: serde::Serialize> {
     pub create: Option<Vec<O>>,
     pub update: Option<Vec<O>>,
+    pub delete: Option<Vec<O>>,
 }
 impl<O> BatchObject<O>
 where
@@ -55,6 +56,7 @@ where
 pub struct BatchObjectBuilder<O: serde::Serialize> {
     pub create: Option<Vec<O>>,
     pub update: Option<Vec<O>>,
+    pub delete: Option<Vec<O>>,
 }
 impl<O> Default for BatchObjectBuilder<O>
 where
@@ -64,6 +66,7 @@ where
         Self {
             create: None,
             update: None,
+            delete: None,
         }
     }
 }
@@ -79,6 +82,10 @@ where
         self.update.get_or_insert(vec![]).push(object);
         self
     }
+    pub fn add_delete(&mut self, object: O) -> &mut Self {
+        self.delete.get_or_insert(vec![]).push(object);
+        self
+    }
     pub fn extend_create(&mut self, vec: Vec<O>) -> &mut Self {
         self.create.get_or_insert(vec![]).extend(vec);
         self
@@ -87,10 +94,15 @@ where
         self.update.get_or_insert(vec![]).extend(vec);
         self
     }
+    pub fn extend_delete(&mut self, vec: Vec<O>) -> &mut Self {
+        self.update.get_or_insert(vec![]).extend(vec);
+        self
+    }
     pub fn build(&self) -> BatchObject<O> {
         BatchObject {
             create: self.create.clone(),
             update: self.update.clone(),
+            delete: self.delete.clone(),
         }
     }
 }
