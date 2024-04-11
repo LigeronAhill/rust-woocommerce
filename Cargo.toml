@@ -1,7 +1,7 @@
 [package]
 name = "rust-woocommerce"
 description = "Framework for woocommerce"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Aleksandr Provotorov <provotorov@inbox.ru>"]
 license = "MIT"
