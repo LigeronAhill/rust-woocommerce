@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::controllers::Entity;
+use serde::{Deserialize, Serialize};
 
 use crate::controllers::product_attribute_terms::{
     AttributeTermCreateBuilder, AttributeTermUpdateBuilder, NoName,

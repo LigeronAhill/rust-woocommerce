@@ -1,6 +1,6 @@
+use crate::controllers::Entity;
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
-use crate::controllers::Entity;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Report {
@@ -8,7 +8,6 @@ pub struct Report {
     pub description: String,
 }
 impl Entity for Report {
-
     fn endpoint() -> String {
         String::from("reports/")
     }
@@ -46,7 +45,6 @@ pub struct SaleReport {
     pub total_customers: i32,
 }
 impl Entity for SaleReport {
-
     fn endpoint() -> String {
         String::from("reports/sales/")
     }
@@ -77,7 +75,6 @@ pub struct TopSellersReport {
 }
 
 impl Entity for TopSellersReport {
-
     fn endpoint() -> String {
         String::from("reports/top_sellers/")
     }
@@ -95,7 +92,6 @@ pub struct ReportOrdersTotals {
     pub total: i32,
 }
 impl Entity for ReportOrdersTotals {
-
     fn endpoint() -> String {
         String::from("reports/orders/totals/")
     }

@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::controllers::Entity;
+use serde::{Deserialize, Serialize};
 
 use crate::controllers::product_shipping_classes::{
     NoName, ShippingClassCreateBuilder, ShippingClassUpdateBuilder,
@@ -18,7 +18,6 @@ pub struct ShippingClass {
     pub count: i32,
 }
 impl Entity for ShippingClass {
-
     fn endpoint() -> String {
         String::from("products/shipping_classes/")
     }

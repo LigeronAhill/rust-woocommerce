@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::controllers::Entity;
+use serde::{Deserialize, Serialize};
 
 use crate::controllers::tax_classes::TaxClassCreateBuilder;
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -10,7 +10,6 @@ pub struct TaxClass {
     pub name: String,
 }
 impl Entity for TaxClass {
-
     fn endpoint() -> String {
         String::from("taxes/classes/")
     }

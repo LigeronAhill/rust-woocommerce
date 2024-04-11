@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::controllers::Entity;
+use serde::{Deserialize, Serialize};
 
 use crate::controllers::product_attributes::{
     AttributeCreateBuilder, AttributeUpdateBuilder, NoName,
@@ -24,7 +24,6 @@ pub struct Attribute {
     pub has_archives: bool,
 }
 impl Entity for Attribute {
-
     fn endpoint() -> String {
         String::from("products/attributes/")
     }

@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::controllers::Entity;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShippingZoneLocation {
@@ -10,7 +10,6 @@ pub struct ShippingZoneLocation {
     pub location_type: LocationType,
 }
 impl Entity for ShippingZoneLocation {
-
     fn endpoint() -> String {
         String::new()
     }

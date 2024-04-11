@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
+use crate::controllers::Entity;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use crate::controllers::Entity;
 
 use crate::controllers::webhooks::{WebhookCreateBuilder, WebhookUpdateBuilder};
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -35,7 +35,6 @@ pub struct Webhook {
     pub date_modified_gmt: Option<NaiveDateTime>,
 }
 impl Entity for Webhook {
-
     fn endpoint() -> String {
         String::from("webhooks/")
     }

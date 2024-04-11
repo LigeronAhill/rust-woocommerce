@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::controllers::Entity;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingGroup {
@@ -15,7 +15,6 @@ pub struct SettingGroup {
     pub sub_groups: Vec<String>,
 }
 impl Entity for SettingGroup {
-
     fn endpoint() -> String {
         String::from("settings/")
     }

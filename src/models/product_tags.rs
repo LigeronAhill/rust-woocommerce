@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::controllers::Entity;
+use serde::{Deserialize, Serialize};
 
 use crate::controllers::product_tags::{NoName, ProductTagCreateBuilder, ProductTagUpdateBuilder};
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -16,7 +16,6 @@ pub struct ProductTag {
     pub count: i32,
 }
 impl Entity for ProductTag {
-
     fn endpoint() -> String {
         String::from("products/tags/")
     }

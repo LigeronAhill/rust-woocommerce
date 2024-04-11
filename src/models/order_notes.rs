@@ -1,6 +1,6 @@
+use crate::controllers::Entity;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use crate::controllers::Entity;
 
 use crate::controllers::order_notes::{
     NoId, NoNote, OrderNotesCreateBuilder, OrderNotesUpdateBuilder,

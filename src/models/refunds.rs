@@ -1,9 +1,9 @@
 use crate::controllers::refunds::{NoAmount, NoItems, RefundCreate, RefundCreateBuilder};
 
 use super::MetaData;
+use crate::controllers::Entity;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use crate::controllers::Entity;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Refund {
@@ -31,7 +31,6 @@ pub struct Refund {
     // pub api_restock: bool,
 }
 impl Entity for Refund {
-
     fn endpoint() -> String {
         String::new()
     }

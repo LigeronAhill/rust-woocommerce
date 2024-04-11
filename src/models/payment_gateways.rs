@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::controllers::Entity;
+use serde::{Deserialize, Serialize};
 
 use crate::controllers::payment_gateways::PaymentGatewayUpdate;
 #[derive(Debug, Clone, Serialize, Deserialize)]

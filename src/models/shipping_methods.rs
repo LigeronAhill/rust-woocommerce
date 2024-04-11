@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::controllers::Entity;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShippingMethod {
@@ -11,7 +11,6 @@ pub struct ShippingMethod {
     pub description: String,
 }
 impl Entity for ShippingMethod {
-
     fn endpoint() -> String {
         String::from("shipping_methods/")
     }

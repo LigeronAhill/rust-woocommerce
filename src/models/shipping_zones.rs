@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::controllers::Entity;
+use serde::{Deserialize, Serialize};
 
 use crate::controllers::shipping_zones::{ShippingZoneCreate, ShippingZoneUpdate};
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -12,7 +12,6 @@ pub struct ShippingZone {
     pub order: i32,
 }
 impl Entity for ShippingZone {
-
     fn endpoint() -> String {
         String::from("shipping/zones/")
     }
