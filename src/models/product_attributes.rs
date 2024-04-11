@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::controllers::Entity;
 
 use crate::controllers::product_attributes::{
     AttributeCreateBuilder, AttributeUpdateBuilder, NoName,
@@ -21,6 +22,17 @@ pub struct Attribute {
     pub order_by: AttributeSortOrder,
     /// Enable/Disable attribute archives. Default is false.
     pub has_archives: bool,
+}
+impl Entity for Attribute {
+
+    fn endpoint() -> String {
+        String::from("products/attributes/")
+    }
+
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
+    }
 }
 impl Attribute {
     pub fn create() -> AttributeCreateBuilder<NoName> {

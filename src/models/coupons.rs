@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::controllers::coupons::{
     CreateCouponBuilder, NoAmount, NoCode, NoDiscountType, UpdateCouponBuilder,
 };
+use crate::controllers::Entity;
 
 use super::MetaData;
 
@@ -63,6 +64,15 @@ pub struct Coupon {
     pub used_by: Vec<String>,
     /// Meta data.
     pub meta_data: Vec<MetaData>,
+}
+impl Entity for Coupon {
+    fn endpoint() -> String {
+        String::from("coupons/")
+    }
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
+    }
 }
 impl Coupon {
     pub fn create() -> CreateCouponBuilder<NoCode, NoDiscountType, NoAmount> {

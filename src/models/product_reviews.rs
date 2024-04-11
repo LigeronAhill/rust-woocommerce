@@ -1,5 +1,6 @@
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use crate::controllers::Entity;
 
 use crate::controllers::product_reviews::{
     NoEmail, NoId, ProductReviewCreateBuilder, ProductReviewUpdateBuilder,
@@ -26,6 +27,17 @@ pub struct ProductReview {
     pub rating: i32,
     /// Shows if the reviewer bought the product or not.
     pub verified: bool,
+}
+impl Entity for ProductReview {
+
+    fn endpoint() -> String {
+        String::from("products/reviews/")
+    }
+
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
+    }
 }
 impl ProductReview {
     pub fn create() -> ProductReviewCreateBuilder<NoId, NoEmail> {

@@ -1,24 +1,24 @@
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
-/// ```rust
-///     let client = ApiClient::from_env()?;
-///     let reports = client.list_all::<Report>(Entity::Report).await?;
-/// ```
+use crate::controllers::Entity;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Report {
     pub slug: String,
     pub description: String,
 }
+impl Entity for Report {
 
-/// ```rust
-///     let client = ApiClient::from_env()?;
-///     let result_with_period = client
-///         .retrieve_sales_report_with_period(Period::Week)
-///         .await?;
-///     let result_with_dates = client
-///         .retrieve_sales_report_with_min_max_dates("2023-12-01", "2023-12-31")
-///         .await?;
-/// ```
+    fn endpoint() -> String {
+        String::from("reports/")
+    }
+
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SaleReport {
     /// Gross sales in the period.
@@ -45,6 +45,17 @@ pub struct SaleReport {
     pub totals: std::collections::HashMap<NaiveDate, Total>,
     pub total_customers: i32,
 }
+impl Entity for SaleReport {
+
+    fn endpoint() -> String {
+        String::from("reports/sales/")
+    }
+
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
+    }
+}
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Total {
     pub sales: String,
@@ -55,34 +66,6 @@ pub struct Total {
     pub discount: String,
     pub customers: i32,
 }
-// #[derive(Debug, Clone, Serialize, Deserialize)]
-// #[serde(rename_all = "snake_case")]
-pub enum Period {
-    Week,
-    Month,
-    LastMonth,
-    Year,
-}
-impl std::fmt::Display for Period {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Period::Week => write!(f, "week"),
-            Period::Month => write!(f, "month"),
-            Period::LastMonth => write!(f, "last_month"),
-            Period::Year => write!(f, "year"),
-        }
-    }
-}
-
-/// ```rust
-///     let client = ApiClient::from_env()?;
-///     let result_with_period = client
-///         .retrieve_top_sellers_report_with_period(Period::Week)
-///         .await?;
-///     let result_with_dates = client
-///         .retrieve_top_sellers_report_with_min_max_dates("2023-12-01", "2023-12-31")
-///         .await?;
-/// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TopSellersReport {
     /// Product title.
@@ -93,19 +76,32 @@ pub struct TopSellersReport {
     pub quantity: i32,
 }
 
-/// ```rust
-///     let client = ApiClient::from_env()?;
-///     let coupons: Vec<ReportTotals> = client.list_all(Entity::ReportCouponsTotal).await?;
-///     let customers: Vec<ReportTotals> =
-///         client.list_all(Entity::ReportCustomersTotal).await?;
-///     let orders: Vec<ReportTotals> = client.list_all(Entity::ReportOrdersTotal).await?;
-///     let products: Vec<ReportTotals> =
-///         client.list_all(Entity::ReportProductsTotal).await?;
-///     let reviews: Vec<ReportTotals> = client.list_all(Entity::ReportReviewsTotal).await?;
-/// ```
+impl Entity for TopSellersReport {
+
+    fn endpoint() -> String {
+        String::from("reports/top_sellers/")
+    }
+
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ReportTotals {
+pub struct ReportOrdersTotals {
     pub slug: String,
     pub name: String,
     pub total: i32,
+}
+impl Entity for ReportOrdersTotals {
+
+    fn endpoint() -> String {
+        String::from("reports/orders/totals/")
+    }
+
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
+    }
 }

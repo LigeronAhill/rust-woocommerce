@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::controllers::Entity;
 
 use crate::controllers::payment_gateways::PaymentGatewayUpdate;
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21,6 +22,16 @@ pub struct PaymentGateway {
     pub method_supports: Vec<String>,
     /// Payment gateway settings.
     pub settings: PaymentGatewaySettings,
+}
+impl Entity for PaymentGateway {
+    fn endpoint() -> String {
+        String::from("payment_gateways/")
+    }
+
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
+    }
 }
 impl PaymentGateway {
     pub fn turn_on() -> PaymentGatewayUpdate {

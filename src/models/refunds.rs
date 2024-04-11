@@ -3,6 +3,8 @@ use crate::controllers::refunds::{NoAmount, NoItems, RefundCreate, RefundCreateB
 use super::MetaData;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use crate::controllers::Entity;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Refund {
     /// Unique identifier for the resource.
@@ -27,6 +29,16 @@ pub struct Refund {
     // pub api_refund:	bool,
     // When true, the selected line items are restocked Default is true.
     // pub api_restock: bool,
+}
+impl Entity for Refund {
+
+    fn endpoint() -> String {
+        String::new()
+    }
+
+    fn child_endpoint(parent_id: i32) -> String {
+        format!("orders/{parent_id}/refunds/")
+    }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrderRefundLineItem {

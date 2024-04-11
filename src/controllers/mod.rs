@@ -25,8 +25,6 @@ pub mod shipping_methods;
 pub mod shipping_zone_locations;
 pub mod shipping_zone_methods;
 pub mod shipping_zones;
-pub mod system_status;
-pub mod system_status_tools;
 pub mod tax_classes;
 pub mod tax_rates;
 pub mod webhooks;

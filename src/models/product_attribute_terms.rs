@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::controllers::Entity;
 
 use crate::controllers::product_attribute_terms::{
     AttributeTermCreateBuilder, AttributeTermUpdateBuilder, NoName,
@@ -17,6 +18,15 @@ pub struct AttributeTerm {
     pub menu_order: i32,
     /// Number of published products for the resource.
     pub count: i32,
+}
+impl Entity for AttributeTerm {
+    fn endpoint() -> String {
+        String::new()
+    }
+
+    fn child_endpoint(parent_id: i32) -> String {
+        format!("products/attributes/{parent_id}/terms/")
+    }
 }
 impl AttributeTerm {
     pub fn create() -> AttributeTermCreateBuilder<NoName> {

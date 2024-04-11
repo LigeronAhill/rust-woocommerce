@@ -1,10 +1,22 @@
 use serde::{Deserialize, Serialize};
+use crate::controllers::Entity;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Data {
     /// Data resource ID.
     pub slug: String,
     /// Data resource description.
     pub description: String,
+}
+
+impl Entity for Data {
+    fn endpoint() -> String {
+        String::from("data/")
+    }
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
+    }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Continent {

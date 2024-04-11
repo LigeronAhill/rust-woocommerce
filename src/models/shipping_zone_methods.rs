@@ -1,4 +1,6 @@
 use serde::{Deserialize, Serialize};
+use crate::controllers::Entity;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShippingZoneMethod {
     pub id: i64,
@@ -18,6 +20,16 @@ pub struct ShippingZoneMethod {
     pub method_description: String,
     /// Shipping method settings.
     pub settings: ShippingSettings,
+}
+impl Entity for ShippingZoneMethod {
+
+    fn endpoint() -> String {
+        String::new()
+    }
+
+    fn child_endpoint(parent_id: i32) -> String {
+        format!("shipping/zones/{parent_id}/methods/")
+    }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShippingSettings {
