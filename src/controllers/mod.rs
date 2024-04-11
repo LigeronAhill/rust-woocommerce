@@ -35,7 +35,7 @@ pub trait Entity: Serialize + for<'de> Deserialize<'de> + Clone + Send + 'static
     fn endpoint() -> String;
     fn child_endpoint(parent_id: i32) -> String;
 }
-
+/// Struct representing an API client
 #[derive(Clone)]
 pub struct ApiClient {
     ck: String,
@@ -45,6 +45,15 @@ pub struct ApiClient {
 }
 
 impl ApiClient {
+    /// Create a new ApiClient instance using configuration
+    ///
+    /// # Arguments
+    ///
+    /// * `config` - A reference to a Config instance containing necessary parameters
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the ApiClient instance if successful, or an error
     pub fn new(config: &Config) -> Result<Self> {
         let ck = config.woo.ck.to_owned();
         let cs = config.woo.cs.to_owned();
@@ -64,6 +73,11 @@ impl ApiClient {
             client,
         })
     }
+    /// Create a new ApiClient instance using environment variables
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the ApiClient instance if successful, or an error
     pub fn from_env() -> Result<Self> {
         let ck = std::env::var("WOO_CK")?;
         let cs = std::env::var("WOO_CS")?;
@@ -78,15 +92,19 @@ impl ApiClient {
             client,
         })
     }
+    /// Get the Consumer Key
     pub fn ck(&self) -> String {
         self.ck.clone()
     }
+    /// Get the Consumer Secret
     pub fn cs(&self) -> String {
         self.cs.clone()
     }
+    /// Get the reqwest Client
     pub fn client(&self) -> reqwest::Client {
         self.client.clone()
     }
+    /// Get the base URL as a string
     pub fn base_url(&self) -> String {
         self.base_url.to_string()
     }

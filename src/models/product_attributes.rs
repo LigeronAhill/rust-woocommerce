@@ -3,6 +3,9 @@ use serde::{Deserialize, Serialize};
 use crate::controllers::product_attributes::{
     AttributeCreateBuilder, AttributeUpdateBuilder, NoName,
 };
+use crate::controllers::products::{AttributeDTOBuilder, NoOptions};
+
+/// Product attribute properties
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Attribute {
     /// Unique identifier for the resource.
@@ -11,7 +14,7 @@ pub struct Attribute {
     pub name: String,
     /// An alphanumeric identifier for the resource unique to its type.
     pub slug: String,
-    /// Type of attribute. By default only select is supported.
+    /// Type of attribute. By default, only select is supported.
     #[serde(rename = "type")]
     pub attribute_type: AttributeType,
     /// Default sort order. Options: menu_order, name, name_num and id. Default is menu_order.
@@ -25,6 +28,9 @@ impl Attribute {
     }
     pub fn update() -> AttributeUpdateBuilder {
         AttributeUpdateBuilder::default()
+    }
+    pub fn builder() -> AttributeDTOBuilder<NoName, NoOptions> {
+        AttributeDTOBuilder::default()
     }
 }
 

@@ -95,7 +95,7 @@ where
         self
     }
     pub fn extend_delete(&mut self, vec: Vec<O>) -> &mut Self {
-        self.update.get_or_insert(vec![]).extend(vec);
+        self.delete.get_or_insert(vec![]).extend(vec);
         self
     }
     pub fn build(&self) -> BatchObject<O> {

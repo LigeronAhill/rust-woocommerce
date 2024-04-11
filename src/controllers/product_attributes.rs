@@ -2,7 +2,7 @@ use serde_with::skip_serializing_none;
 
 use serde::{Deserialize, Serialize};
 
-use crate::product_attributes::{AttributeSortOrder, AttributeType};
+use crate::{AttributeSortOrder, AttributeType};
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]

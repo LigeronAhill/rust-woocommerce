@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::product_reviews::ReviewStatus;
+use crate::ReviewStatus;
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]

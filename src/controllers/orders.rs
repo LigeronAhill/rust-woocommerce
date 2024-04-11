@@ -1,9 +1,4 @@
-use crate::{
-    customers::{Billing, Shipping},
-    data::CurrencyISO,
-    orders::{OrderStatus, TaxStatus},
-    MetaData,
-};
+use crate::{Billing, CurrencyISO, MetaData, OrderStatus, Shipping, TaxStatus};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;

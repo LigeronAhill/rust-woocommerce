@@ -3,10 +3,8 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::{
-    products::{
-        BackordersStatus, CatalogVisibility, ProductStatus, ProductType, StockStatus, TaxStatus,
-    },
-    MetaData,
+    BackordersStatus, CatalogVisibility, MetaData, ProductStatus, ProductType, StockStatus,
+    TaxStatus,
 };
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -150,6 +148,10 @@ impl ProductModifyBuilder {
         let _ = self.featured.insert(true);
         self
     }
+    pub fn unfeatured(&mut self) -> &mut Self {
+        let _ = self.featured.insert(false);
+        self
+    }
     /// Catalog visibility. Options: visible, catalog, search and hidden. Default is visible.
     pub fn catalog_visibility(&mut self, catalog_visibility: CatalogVisibility) -> &mut Self {
         let _ = self.catalog_visibility.insert(catalog_visibility);
@@ -199,7 +201,7 @@ impl ProductModifyBuilder {
         self
     }
     /// If the product is virtual. Default is false.
-    pub fn is_virtual(&mut self) -> &mut Self {
+    pub fn set_virtual(&mut self) -> &mut Self {
         let _ = self.is_virtual.insert(true);
         self
     }
@@ -531,17 +533,7 @@ impl<N, O> AttributeDTOBuilder<N, O> {
         let _ = self.variation.insert(true);
         self
     }
-    /// List of available term names of the attribute.
-    pub fn option(self, option: impl Into<String>) -> AttributeDTOBuilder<N, Options> {
-        AttributeDTOBuilder {
-            id: self.id,
-            name: self.name,
-            position: self.position,
-            visible: self.visible,
-            variation: self.variation,
-            options: Options(vec![option.into()]),
-        }
-    }
+
     /// List of available term names of the attribute.
     pub fn options(self, options: Vec<String>) -> AttributeDTOBuilder<N, Options> {
         AttributeDTOBuilder {
@@ -551,6 +543,25 @@ impl<N, O> AttributeDTOBuilder<N, O> {
             visible: self.visible,
             variation: self.variation,
             options: Options(options),
+        }
+    }
+}
+impl<N> AttributeDTOBuilder<N, Options> {
+    pub fn option(mut self, option: impl Into<String>) -> Self {
+        self.options.0.push(option.into());
+        self
+    }
+}
+impl<N> AttributeDTOBuilder<N, NoOptions> {
+    /// List of available term names of the attribute.
+    pub fn option(self, option: impl Into<String>) -> AttributeDTOBuilder<N, Options> {
+        AttributeDTOBuilder {
+            id: self.id,
+            name: self.name,
+            position: self.position,
+            visible: self.visible,
+            variation: self.variation,
+            options: Options(vec![option.into()]),
         }
     }
 }
@@ -567,7 +578,9 @@ impl AttributeDTOBuilder<WithName, Options> {
     }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[skip_serializing_none]
 pub struct DefaultAttributeDTO {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<i32>,
     pub name: String,
     pub option: String,

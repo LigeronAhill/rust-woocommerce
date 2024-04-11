@@ -1,7 +1,8 @@
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
-use crate::controllers::customers::{CreateCustomerBuilder, NoEmail, UpdateCustomerBuilder};
+use crate::controllers::customers::{CreateCustomer, UpdateCustomer};
+use crate::controllers::Entity;
 
 use super::MetaData;
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,6 +35,15 @@ pub struct Customer {
     pub avatar_url: String,
     /// Meta data.
     pub meta_data: Vec<MetaData>,
+}
+impl Entity for Customer {
+    fn endpoint() -> String {
+        String::from("customers/")
+    }
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
+    }
 }
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Billing {
@@ -95,10 +105,10 @@ pub enum Role {
     ShopManager,
 }
 impl Customer {
-    pub fn create() -> CreateCustomerBuilder<NoEmail> {
-        CreateCustomerBuilder::default()
+    pub fn create<T: ToString>(email: T) -> CreateCustomer {
+        CreateCustomer::new(email)
     }
-    pub fn update() -> UpdateCustomerBuilder {
-        UpdateCustomerBuilder::default()
+    pub fn update() -> UpdateCustomer {
+        UpdateCustomer::default()
     }
 }

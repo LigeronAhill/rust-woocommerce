@@ -1,8 +1,7 @@
+use crate::controllers::Entity;
 use serde::{Deserialize, Serialize};
 
-use crate::controllers::product_categories::{
-    CategoryCreateBuilder, CategoryUpdateBuilder, NoName,
-};
+use crate::controllers::product_categories::{CategoryCreate, CategoryUpdate};
 
 use super::products::ProductImage;
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -23,15 +22,25 @@ pub struct Category {
     pub image: Option<ProductImage>,
     /// Menu order, used to custom sort the resource.
     pub menu_order: i32,
-    /// Number of published products for the resource.READ-ONLY
+    /// Number of published products for the resource. READ-ONLY
     pub count: i32,
 }
 impl Category {
-    pub fn create() -> CategoryCreateBuilder<NoName> {
-        CategoryCreateBuilder::default()
+    pub fn create<T: ToString>(name: T) -> CategoryCreate {
+        CategoryCreate::new(name)
     }
-    pub fn update() -> CategoryUpdateBuilder {
-        CategoryUpdateBuilder::default()
+    pub fn update() -> CategoryUpdate {
+        CategoryUpdate::default()
+    }
+}
+
+impl Entity for Category {
+    fn endpoint() -> String {
+        String::from("products/categories/")
+    }
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
     }
 }
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]

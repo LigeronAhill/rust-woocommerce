@@ -5,8 +5,11 @@ use super::{
     data::CurrencyISO,
     MetaData,
 };
+use crate::controllers::Entity;
+use crate::TaxStatus;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Order {
     /// Unique identifier for the resource.
@@ -100,6 +103,15 @@ impl Order {
     }
     pub fn update() -> UpdateOrderBuilder {
         UpdateOrderBuilder::default()
+    }
+}
+impl Entity for Order {
+    fn endpoint() -> String {
+        String::from("orders/")
+    }
+    fn child_endpoint(parent_id: i32) -> String {
+        let _ = parent_id;
+        String::new()
     }
 }
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
@@ -244,10 +256,4 @@ pub struct OrderTax {
     pub shipping_tax_total: String,
     /// Meta data.
     pub meta_data: Vec<MetaData>,
-}
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum TaxStatus {
-    Taxable,
-    None,
 }

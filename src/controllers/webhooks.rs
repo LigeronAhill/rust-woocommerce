@@ -2,7 +2,7 @@ use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::webhooks::{Event, Resource, WebhookStatus};
+use crate::{Event, Resource, WebhookStatus};
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WebhookCreate {
@@ -145,7 +145,7 @@ impl WebhookUpdateBuilder {
     pub fn build(self) -> Result<WebhookUpdate> {
         if let Some(resource) = self.resource {
             let Some(event) = self.event else {
-                return Err(anyhow!("resourse set, but event not set!"));
+                return Err(anyhow!("resource set, but event not set!"));
             };
             let topic = Some(format!("{resource}.{event}"));
             Ok(WebhookUpdate {

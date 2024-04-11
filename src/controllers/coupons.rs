@@ -1,6 +1,6 @@
 use serde_with::skip_serializing_none;
 
-use crate::{coupons::DiscountType, MetaData};
+use crate::{DiscountType, MetaData};
 #[skip_serializing_none]
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Default)]
 pub struct CreateCoupon {

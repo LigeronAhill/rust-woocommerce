@@ -151,10 +151,7 @@ impl Entity for Product {
     }
 }
 impl Product {
-    pub fn create() -> ProductModifyBuilder {
-        ProductModify::builder()
-    }
-    pub fn update() -> ProductModifyBuilder {
+    pub fn builder() -> ProductModifyBuilder {
         ProductModify::builder()
     }
 }

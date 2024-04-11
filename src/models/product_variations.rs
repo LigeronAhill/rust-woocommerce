@@ -1,6 +1,4 @@
-use crate::controllers::product_variations::{
-    ProductVariationCreateBuilder, ProductVariationUpdateBuilder,
-};
+use crate::controllers::product_variations::ProductVariationModifyBuilder;
 
 use super::{
     products::{
@@ -9,8 +7,10 @@ use super::{
     },
     MetaData,
 };
+use crate::controllers::Entity;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProductVariation {
     /// Unique identifier for the resource.
@@ -43,7 +43,7 @@ pub struct ProductVariation {
     pub date_on_sale_to: Option<NaiveDateTime>,
     /// End date of sale price, as GMT.
     pub date_on_sale_to_gmt: Option<NaiveDateTime>,
-    /// Shows if the variation is on sale.READ-ONLY
+    /// Shows if the variation is on sale. READ-ONLY
     pub on_sale: bool,
     /// Variation status. Options: draft, pending, private and publish. Default is publish.
     pub status: ProductStatus,
@@ -93,12 +93,19 @@ pub struct ProductVariation {
     /// Meta data.
     pub meta_data: Vec<MetaData>,
 }
-impl ProductVariation {
-    pub fn update() -> ProductVariationUpdateBuilder {
-        ProductVariationUpdateBuilder::default()
+
+impl Entity for ProductVariation {
+    fn endpoint() -> String {
+        String::new()
     }
-    pub fn create() -> ProductVariationCreateBuilder {
-        ProductVariationCreateBuilder::default()
+
+    fn child_endpoint(parent_id: i32) -> String {
+        format!("products/{parent_id}/variations/")
+    }
+}
+impl ProductVariation {
+    pub fn builder() -> ProductVariationModifyBuilder {
+        ProductVariationModifyBuilder::default()
     }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
