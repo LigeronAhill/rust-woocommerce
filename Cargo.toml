@@ -1,7 +1,7 @@
 [package]
 name = "rust-woocommerce"
 description = "Framework for woocommerce"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["Aleksandr Provotorov <provotorov@inbox.ru>"]
 license = "MIT"
@@ -14,11 +14,11 @@ exclude = ["Makefile.toml"]
 
 [dependencies]
 chrono = { version = "0.4.37", features = ["serde"] }
-reqwest = {version = "0.12.3", features = ["json", "gzip"]}
+reqwest = { version = "0.12.3", features = ["json", "gzip"] }
 serde = { version = "1.0.193", features = ["derive"] }
 serde_json = "1.0.115"
 serde_with = "3.7.0"
-tokio = {version = "1.37.0", features = ["macros", "rt-multi-thread"]}
+tokio = { version = "1.37.0", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1.40"
 tl = "0.7.8"
 regex = "1.10.4"

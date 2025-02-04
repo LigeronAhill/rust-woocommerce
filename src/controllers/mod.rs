@@ -72,6 +72,24 @@ impl ApiClient {
         })
     }
     /// Create a new ApiClient instance using environment variables
+    pub fn init(host: impl AsRef<str>, ck: impl AsRef<str>, cs: impl AsRef<str>) -> Result<Self> {
+        let client = reqwest::Client::builder().gzip(true).build()?;
+        let base_url = match url::Url::parse(host.as_ref()) {
+            Ok(url) => url.join("/wp-json/wc/v3/")?,
+            Err(_) => {
+                let raw_url = format!("https://{url}", url = host.as_ref());
+                let url = url::Url::parse(&raw_url)?;
+                url.join("/wp-json/wc/v3/")?
+            }
+        };
+        Ok(Self {
+            client,
+            base_url,
+            ck: ck.as_ref().into(),
+            cs: cs.as_ref().into(),
+        })
+    }
+    /// Create a new ApiClient instance using environment variables
     ///
     /// # Returns
     ///
